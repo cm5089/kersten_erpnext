@@ -158,7 +158,7 @@ fixtures = [
 				"Web Page Block-copy_from_doctype"
 		]]]
 		},
-		{"dt":"Custom Script", "filters": [["name", "in", [
+		{"dt":"Client Script", "filters": [["name", "in", [
 				"Item-Client",
 		]]]},
 ]
