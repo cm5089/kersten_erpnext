@@ -95,6 +95,28 @@
 			</div>
 		{% endif %}
 </div>
+{% if doc.faq %}
+{% for row in doc.faq %}
+{% set faq = frappe.get_doc("FAQ",row.question)%}
+<div class="collapsible-item">
+    <a aria-controls="id-732e168a92ce-1" aria-expanded="false" class="collapsible-title" data-toggle="collapse" href="#id-732e168a92ce-{{row.idx}}" role="button">
+        <div class="collapsible-item-title">{{faq.question}}</div>
+        <svg class="collapsible-icon" height="24" viewBox="0 0 16 16" width="24" xmlns="http://www.w3.org/2000/svg">
+            <path class="vertical" d="M8 4V12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></path>
+            <path class="horizontal" d="M4 8H12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"></path>
+        </svg>
+    </a>
+    <div class="collapse collapsible-content from-markdown" id="id-732e168a92ce-{{row.idx}}">
+        <div>
+            <p>{{faq.answer}}</p>
+            {% if faq.related_title %}
+            <a href="{% if faq.related_url %}{{faq.related_url}}{% else %} # {% endif %}">{{faq.related_title}}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
 {% endblock %}
 
 {% block base_scripts %}
