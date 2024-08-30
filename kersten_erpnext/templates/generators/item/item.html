@@ -10,7 +10,7 @@
 {% block page_content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
 <div class="item-content">
-	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
+	<div class="product-page-content">
 		<div class="container">
 			<div class="row mb-5">
 				{% include "templates/generators/item/item_image.html" %}
@@ -95,8 +95,10 @@
 			</div>
 		{% endif %}
 </div>
-{% if doc.faq %}
-{% for row in doc.faq %}
+{% if doc.faq_group %}
+{% for i in doc.faq_group %}
+{% set group = frappe.get_doc("FAQ Groups",i.faq_group_item)%}
+{% for row in group.faq_questions %}
 {% set faq = frappe.get_doc("FAQ",row.question)%}
 <div class="collapsible-item">
     <a aria-controls="id-732e168a92ce-1" aria-expanded="false" class="collapsible-title" data-toggle="collapse" href="#id-732e168a92ce-{{row.idx}}" role="button">
@@ -109,12 +111,13 @@
     <div class="collapse collapsible-content from-markdown" id="id-732e168a92ce-{{row.idx}}">
         <div>
             <p>{{faq.answer}}</p>
-            {% if faq.related_title %}
-            <a href="{% if faq.related_url %}{{faq.related_url}}{% else %} # {% endif %}">{{faq.related_title}}</a>
-            {% endif %}
+            {% if faq.related_title  and faq.related_url %}
+            <i><a href="{% if faq.related_url %}{{faq.related_url}}{% else %} # {% endif %}">{{faq.related_title}}</a></i>
+            {%endif%}
         </div>
     </div>
 </div>
+{% endfor %}
 {% endfor %}
 {% endif %}
 {% endblock %}

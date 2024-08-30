@@ -146,20 +146,6 @@ update_website_context = ["kersten_erpnext.templates.generators.item.item.set_pa
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
 fixtures = [
-		{	"dt":"Custom Field",
-			"filters": [["name", "in", [
-				"Item-page_building_blocks",
-				"Item-website_content_section",
-				"Item-section_break_139",
-				"Item-full_width",
-				"Item-column_break_137",
-				"Item-content_type"
-				"Web Page Block-copy_from_doctype",
-				"Web Page Block-copy_from_doctype"
-		]]]
-		},
-		{"dt":"Client Script", "filters": [["name", "in", [
-				"Item-Client",
-		]]]},
+    {"dt": "Custom Field","filters": [["module", "=","Kersten Erpnext"]]},
 ]
 
