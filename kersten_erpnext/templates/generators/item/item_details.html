@@ -41,7 +41,13 @@
 
 	<div itemprop="review" itemscope itemtype="https://schema.org/Review">
 	</div> -->
-
+	<p class="product-code">
+		{% for row in parents %}
+    	{% if loop.last %}
+        <a href="{{ parents[-1].route }}" class="text-muted">{{ parents[-1].name }}</a>
+    	{% endif %}
+		{% endfor %}
+	</p>
 	<p class="product-code">
 		<span class="product-item-group">
 			{{ _(doc.item_group) }}
@@ -51,6 +57,7 @@
 		</span>
 		<span itemprop="name">{{ doc.item_code }}</span>
 	</p>
+	
 	{% if has_variants %}
 		<!-- configure template -->
 		{% include "templates/generators/item/item_configure.html" %}
