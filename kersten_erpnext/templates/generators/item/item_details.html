@@ -43,7 +43,7 @@
 	<p class="product-code">
 		{% for row in parents %}
     	{% if loop.last %}
-        <a href="{{ parents[-1].route }}" class="text-muted">{{ parents[-1].name }}</a>
+        <a href="/{{ parents[-1].route }}" class="text-muted">{{ parents[-1].name }}</a>
     	{% endif %}
 		{% endfor %}
 	</p>
