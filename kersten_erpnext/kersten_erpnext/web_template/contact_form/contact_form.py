@@ -80,6 +80,7 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 		opportunity.contact_mobile = mobile_no
 		opportunity.source = ""
 		opportunity.save(ignore_permissions = True)
+		opportunity.flags.ignore_permissions = True
 		# frappe.db.set_value("Customer" , customer.name , 'opportunity_name' , opportunity.name , update_modified=False)
 		add_comment(reference_doctype = "Opportunity", reference_name=opportunity.name, content = message, comment_email=sender, comment_by = frappe.session.user)
 		
