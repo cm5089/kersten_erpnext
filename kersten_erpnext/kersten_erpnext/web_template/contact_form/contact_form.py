@@ -71,7 +71,9 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 		lead.last_name = last_name
 		lead.email_id = sender
 		lead.company_name = organisation_name
+		lead.flags.ignore_mandatory = True
 		lead.save(ignore_permissions = True)
+
  		
 		opportunity = frappe.new_doc("Opportunity")
 		opportunity.opportunity_from = "Lead"
@@ -79,8 +81,10 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 		opportunity.contact_email = sender
 		opportunity.contact_mobile = mobile_no
 		opportunity.source = ""
-		opportunity.save(ignore_permissions = True)
 		opportunity.flags.ignore_permissions = True
+		opportunity.flags.ignore_mandatory = True
+		opportunity.save(ignore_permissions = True)
+		
 		# frappe.db.set_value("Customer" , customer.name , 'opportunity_name' , opportunity.name , update_modified=False)
 		add_comment(reference_doctype = "Opportunity", reference_name=opportunity.name, content = message, comment_email=sender, comment_by = frappe.session.user)
 		
@@ -101,6 +105,7 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 			"phone":mobile_no,
 			"is_primary_phone":1
 		})
+		contact.flags.ignore_mandatory = True
 		contact.save(ignore_permissions=True)
 		
 
