@@ -80,7 +80,7 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 		opportunity.party_name = lead.name
 		opportunity.contact_email = sender
 		opportunity.contact_mobile = mobile_no
-		opportunity.source = ""
+		opportunity.source = "Contact Form Submission"
 		opportunity.flags.ignore_permissions = True
 		opportunity.flags.ignore_mandatory = True
 		opportunity.save(ignore_permissions = True)
