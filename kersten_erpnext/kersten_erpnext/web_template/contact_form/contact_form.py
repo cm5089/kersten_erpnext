@@ -32,8 +32,7 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=1000, seconds=60 * 60)
-def send_message(sender, message, first_name = None, last_name = None, mobile_no = None, postal_code=None, organisation_name = None, subject="Website Query" ):
-	
+def send_message(sender, message, first_name=None, last_name=None, mobile_no=None, postal_code=None, organisation_name=None, subject="Website Query"):
 	sender = validate_email_address(sender, throw=True)
 
 	with suppress(frappe.OutgoingEmailError):
@@ -46,35 +45,94 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 			subject="We've received your query!",
 		)
 
-	contact_data = frappe.db.sql(f""" Select co.name , dl.link_name From `tabContact` as co
-						  					Left join `tabContact Email` as ce ON ce.parent = co.name
-						  					left join `tabDynamic Link` as dl ON dl.parent = co.name
-						  					Where ce.email_id = '{sender}' and dl.link_doctype = "Lead" 
-											""",as_dict = 1)
+	# Check if contact is already linked to a Lead
+	contact_data = frappe.db.sql("""
+		SELECT co.name, dl.link_name
+		FROM `tabContact` co
+		LEFT JOIN `tabContact Email` ce ON ce.parent = co.name
+		LEFT JOIN `tabDynamic Link` dl ON dl.parent = co.name
+		WHERE ce.email_id = %s AND dl.link_doctype = 'Lead'
+	""", (sender,), as_dict=1)
+
 	if contact_data:
 		doc = frappe.new_doc("Opportunity")
 		doc.opportunity_from = "Lead"
 		doc.party_name = contact_data[0].link_name
 		doc.contact_mobile = mobile_no
 		doc.contact_email = sender
-		doc.save(ignore_permissions = True)
-		add_comment("Opportunity" , doc.name , content=message , comment_email = sender, comment_by = None) 
-	
-	contact_but_no_lead = frappe.db.sql(f""" Select co.name  From `tabContact` as co
-						  					Left join `tabContact Email` as ce ON ce.parent = co.name
-						  					Where ce.email_id = '{sender}'
-											""",as_dict = 1)
-	
-	if not contact_but_no_lead:
+		doc.flags.ignore_permissions = True
+		doc.flags.ignore_mandatory = True
+		doc.save()
+		add_comment("Opportunity", doc.name, content=message, comment_email=sender, comment_by=None)
+		return
+
+	# Check if contact exists but no linked Lead
+	contact_but_no_lead = frappe.db.sql("""
+		SELECT co.name FROM `tabContact` co
+		LEFT JOIN `tabContact Email` ce ON ce.parent = co.name
+		WHERE ce.email_id = %s
+	""", (sender,), as_dict=1)
+
+	# Check if Customer exists
+	customer_exists = frappe.db.exists("Customer", {"customer_name": organisation_name})
+
+	if customer_exists:
+		# Check if contact is already linked to this customer
+		contact_name = frappe.db.get_value("Dynamic Link", {
+			"link_doctype": "Customer",
+			"link_name": organisation_name,
+			"parenttype": "Contact"
+		}, "parent")
+
+		# If not found, create contact
+		if not contact_name:
+			contact = frappe.new_doc("Contact")
+			contact.first_name = first_name or sender
+			contact.last_name = last_name
+			contact.email_id = sender
+			contact.mobile_no = mobile_no
+			contact.append("email_ids", {
+				"email_id": sender,
+				"is_primary": 1
+			})
+			contact.append("phone_nos", {
+				"phone": mobile_no,
+				"is_primary_phone": 1
+			})
+			contact.append("links", {
+				"link_doctype": "Customer",
+				"link_name": organisation_name
+			})
+			contact.flags.ignore_mandatory = True
+			contact.insert(ignore_permissions=True)
+			contact_name = contact.name
+
+		# Create opportunity for Customer
+		opportunity = frappe.new_doc("Opportunity")
+		opportunity.opportunity_from = "Customer"
+		opportunity.party_name = organisation_name
+		opportunity.contact_email = sender
+		opportunity.contact_mobile = mobile_no
+		opportunity.contact_phone = mobile_no
+		opportunity.contact_person = contact_name
+		opportunity.customer_application = "Website"
+		opportunity.source = "Contact Form Submission"
+		opportunity.flags.ignore_permissions = True
+		opportunity.flags.ignore_mandatory = True
+		opportunity.insert(ignore_permissions=True)
+
+		add_comment("Opportunity", opportunity.name, content=message, comment_email=sender, comment_by=frappe.session.user)
+
+	else:
+		# Create Lead and linked Contact
 		lead = frappe.new_doc("Lead")
 		lead.first_name = first_name
 		lead.last_name = last_name
 		lead.email_id = sender
 		lead.company_name = organisation_name
 		lead.flags.ignore_mandatory = True
-		lead.save(ignore_permissions = True)
+		lead.save(ignore_permissions=True)
 
- 		
 		opportunity = frappe.new_doc("Opportunity")
 		opportunity.opportunity_from = "Lead"
 		opportunity.party_name = lead.name
@@ -83,30 +141,30 @@ def send_message(sender, message, first_name = None, last_name = None, mobile_no
 		opportunity.source = "Contact Form Submission"
 		opportunity.flags.ignore_permissions = True
 		opportunity.flags.ignore_mandatory = True
-		opportunity.save(ignore_permissions = True)
-		
-		# frappe.db.set_value("Customer" , customer.name , 'opportunity_name' , opportunity.name , update_modified=False)
-		add_comment(reference_doctype = "Opportunity", reference_name=opportunity.name, content = message, comment_email=sender, comment_by = frappe.session.user)
-		
+		opportunity.save(ignore_permissions=True)
+
+		add_comment("Opportunity", opportunity.name, content=message, comment_email=sender, comment_by=frappe.session.user)
+
 		contact = frappe.new_doc("Contact")
 		contact.first_name = first_name
 		contact.last_name = last_name
 		contact.email_id = sender
 		contact.mobile_no = mobile_no
-		contact.append("email_ids",{
-			"email_id":sender,
-			"is_primary":1
+		contact.append("email_ids", {
+			"email_id": sender,
+			"is_primary": 1
 		})
-		contact.append("links",{
-			"link_doctype":"Lead",
-			"link_name":lead.name
+		contact.append("links", {
+			"link_doctype": "Lead",
+			"link_name": lead.name
 		})
-		contact.append("phone_nos",{
-			"phone":mobile_no,
-			"is_primary_phone":1
+		contact.append("phone_nos", {
+			"phone": mobile_no,
+			"is_primary_phone": 1
 		})
 		contact.flags.ignore_mandatory = True
 		contact.save(ignore_permissions=True)
+
 		
 
 	
