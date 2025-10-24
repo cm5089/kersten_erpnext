@@ -11,6 +11,7 @@ frappe.ready(function() {
 		var message = $('[name="message"]').val();
 		var first_name = $('[name="first_name"]').val();
 		var last_name = $('[name="last_name"]').val();
+		var url = $('[name="url"]').val();
 		var organisation_name = $('[name="organisation_name"]').val();
 		var mobile_no = $('[name="mobile_no"]').val();
 		var postal_code = $('[name="postal_code"]').val();
@@ -35,6 +36,7 @@ frappe.ready(function() {
 				message: message,
 				first_name:first_name,
 				last_name:last_name,
+				url:url,
 				mobile_no:mobile_no,
 				organisation_name:organisation_name,
 				postal_code : postal_code

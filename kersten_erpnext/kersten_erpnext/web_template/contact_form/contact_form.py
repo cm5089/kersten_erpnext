@@ -32,7 +32,7 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 @rate_limit(limit=1000, seconds=60 * 60)
-def send_message(sender, message, first_name=None, last_name=None, mobile_no=None, postal_code=None, organisation_name=None, subject="Website Query"):
+def send_message(sender, message, first_name=None, last_name=None,url=None, mobile_no=None, postal_code=None, organisation_name=None, subject="Website Query"):
 	sender = validate_email_address(sender, throw=True)
 
 	with suppress(frappe.OutgoingEmailError):
@@ -60,6 +60,7 @@ def send_message(sender, message, first_name=None, last_name=None, mobile_no=Non
 		doc.party_name = contact_data[0].link_name
 		doc.contact_mobile = mobile_no
 		doc.contact_email = sender
+		doc.custom_inquiry_from = url
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
@@ -78,14 +79,11 @@ def send_message(sender, message, first_name=None, last_name=None, mobile_no=Non
 
 	if customer_exists:
 		# Check if contact is already linked to this customer
-		contact_name = frappe.db.get_value("Dynamic Link", {
-			"link_doctype": "Customer",
-			"link_name": organisation_name,
-			"parenttype": "Contact"
-		}, "parent")
+		existing_contact = frappe.db.get_value("Contact Email", {"email_id": sender}, "parent")
 
-		# If not found, create contact
-		if not contact_name:
+		if existing_contact:
+			contact_name = existing_contact
+		else:
 			contact = frappe.new_doc("Contact")
 			contact.first_name = first_name or sender
 			contact.last_name = last_name
@@ -115,6 +113,7 @@ def send_message(sender, message, first_name=None, last_name=None, mobile_no=Non
 		opportunity.contact_mobile = mobile_no
 		opportunity.contact_phone = mobile_no
 		opportunity.contact_person = contact_name
+		opportunity.custom_inquiry_from = url
 		opportunity.customer_application = "Website"
 		opportunity.source = "Contact Form Submission"
 		opportunity.flags.ignore_permissions = True
@@ -129,6 +128,7 @@ def send_message(sender, message, first_name=None, last_name=None, mobile_no=Non
 		lead.first_name = first_name
 		lead.last_name = last_name
 		lead.email_id = sender
+		lead.website = url
 		lead.company_name = organisation_name
 		lead.flags.ignore_mandatory = True
 		lead.save(ignore_permissions=True)
@@ -138,6 +138,7 @@ def send_message(sender, message, first_name=None, last_name=None, mobile_no=Non
 		opportunity.party_name = lead.name
 		opportunity.contact_email = sender
 		opportunity.contact_mobile = mobile_no
+		opportunity.custom_inquiry_from = url
 		opportunity.source = "Contact Form Submission"
 		opportunity.flags.ignore_permissions = True
 		opportunity.flags.ignore_mandatory = True
