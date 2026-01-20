@@ -1,1 +1,4 @@
+[pre_model_sync]
 kersten_erpnext.patches.v1_0.migrate_page_building_blocks_from_item_to_website_item #29-12-21
+ 
+[post_model_sync]
