@@ -5,26 +5,26 @@
 	.address {
 		line-height: 1.7rem;
 	}
-	h1{
-	    margin-top:unset;
+
+	h1 {
+		margin-top: unset;
 	}
 </style>
 <div class="custom-contact-content">
 
 	<div class="row">
 		<div class="col-md-8">
-			<p id="contact-alert" class="alert alert-warning"
-				style="display: none;">&nbsp;</p>
+			<p id="contact-alert" class="alert alert-warning" style="display: none;">&nbsp;</p>
 			<div class="form-group">
 				<select name="subject" class="form-control">
-				{% if  frappe.db.get_single_value("Contact Us Settings", 'query_options') -%}
-				{% set query_options = frappe.db.get_value("Contact Us Settings" , None , 'query_options') %}
+					{% if frappe.db.get_single_value("Contact Us Settings", 'query_options') -%}
+					{% set query_options = frappe.db.get_value("Contact Us Settings" , None , 'query_options') %}
 					{% for option in query_options.split("\n") -%}
 					<option value="{{ option }}">{{ option }}</option>
 					{%- endfor %}
-				{% else %}
+					{% else %}
 					<option value="General">General</option>
-				{% endif %}
+					{% endif %}
 				</select>
 			</div>
 			<div class="form-group">
@@ -34,26 +34,28 @@
 				<input rows="10" name="last_name" class="form-control" type="text" placeholder="{{ _('Last Name') }}">
 			</div>
 			<div class="form-group">
-				<input rows="10" name="mobile_no" class="form-control" type="text" placeholder="{{ _('Contact Number') }}">
+				<input rows="10" name="mobile_no" class="form-control" type="text"
+					placeholder="{{ _('Contact Number') }}">
 			</div>
 			<div class="form-group">
 				<input rows="10" name="url" class="form-control" type="text" placeholder="{{ _('Url') }}">
 			</div>
 			<div class="form-group">
-				<input class="form-control" name="email" type="text"
-				placeholder="{{ _('Your email address') }}" />
+				<input class="form-control" name="email" type="text" placeholder="{{ _('Your email address') }}" />
 			</div>
 			<div class="form-group">
-				<input rows="10" name="postal_code" class="form-control" type="text" placeholder="{{ _('Postal Code') }}">
+				<input rows="10" name="postal_code" class="form-control" type="text"
+					placeholder="{{ _('Postal Code') }}">
 			</div>
 			<div class="form-group">
-				<input rows="10" name="organisation_name" class="form-control" placeholder="{{ _('Organisation Name') }}">
+				<input rows="10" name="organisation_name" class="form-control"
+					placeholder="{{ _('Organisation Name') }}">
 			</div>
 			<div class="form-group">
 				<textarea rows="10" name="message" class="form-control" placeholder="{{ _('Message') }}"></textarea>
 			</div>
 			<div class="form-group">
-				<button class="btn btn-primary btn-send">{{ _("Send") }}</button>
+				<button class="btn btn-primary btn-send">{{ _("Send my Enquiry") }}</button>
 			</div>
 		</div>
 	</div>
