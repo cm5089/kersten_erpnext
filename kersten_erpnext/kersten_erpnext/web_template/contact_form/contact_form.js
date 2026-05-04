@@ -2,10 +2,6 @@
 // MIT License. See license.txt
 
 frappe.ready(function() {
-	if(frappe.utils.get_url_arg('subject')) {
-	  $('[name="subject"]').val(frappe.utils.get_url_arg('subject'));
-	}
-
 	$('.btn-send').off("click").on("click", function() {
 		var email = $('[name="email"]').val();
 		var message = $('[name="message"]').val();
@@ -14,10 +10,9 @@ frappe.ready(function() {
 		var url = $('[name="url"]').val();
 		var organisation_name = $('[name="organisation_name"]').val();
 		var mobile_no = $('[name="mobile_no"]').val();
-		var postal_code = $('[name="postal_code"]').val();
 
-		if(!(email && message)) {
-			frappe.msgprint('{{ _("Please enter both your email and message so that we can get back to you. Thanks!") }}');
+		if(!(first_name && last_name && email)) {
+			frappe.msgprint('{{ _("Please enter your First Name, Last Name and Email so that we can get back to you. Thanks!") }}');
 			return false;
 		}
 
@@ -31,15 +26,13 @@ frappe.ready(function() {
 		frappe.call({
 			method:"kersten_erpnext.kersten_erpnext.web_template.contact_form.contact_form.send_message",
 			args: {
-				subject: $('[name="subject"]').val(),
 				sender: email,
 				message: message,
-				first_name:first_name,
-				last_name:last_name,
-				url:url,
-				mobile_no:mobile_no,
-				organisation_name:organisation_name,
-				postal_code : postal_code
+				first_name: first_name,
+				last_name: last_name,
+				url: url,
+				mobile_no: mobile_no,
+				organisation_name: organisation_name
 			},
 			callback: function(r) {
 				if (!r.exc) {

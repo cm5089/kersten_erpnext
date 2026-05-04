@@ -9,6 +9,20 @@
 	h1 {
 		margin-top: unset;
 	}
+
+	.required-star {
+		color: #e53935;
+		margin-left: 2px;
+		font-weight: bold;
+	}
+
+	.form-label {
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: #555;
+		margin-bottom: 3px;
+		display: block;
+	}
 </style>
 <div class="custom-contact-content">
 
@@ -16,51 +30,42 @@
 		<div class="col-md-8">
 			<p id="contact-alert" class="alert alert-warning" style="display: none;">&nbsp;</p>
 			<div class="form-group">
-				<select name="subject" class="form-control">
-					{% if frappe.db.get_single_value("Contact Us Settings", 'query_options') -%}
-					{% set query_options = frappe.db.get_value("Contact Us Settings" , None , 'query_options') %}
-					{% for option in query_options.split("\n") -%}
-					<option value="{{ option }}">{{ option }}</option>
-					{%- endfor %}
-					{% else %}
-					<option value="General">General</option>
-					{% endif %}
-				</select>
-			</div>
-			<div class="form-group">
+				<label class="form-label">{{ _('First Name') }}<span class="required-star">*</span></label>
 				<input rows="10" name="first_name" class="form-control" type="text" placeholder="{{ _('First Name') }}">
 			</div>
 			<div class="form-group">
+				<label class="form-label">{{ _('Last Name') }}<span class="required-star">*</span></label>
 				<input rows="10" name="last_name" class="form-control" type="text" placeholder="{{ _('Last Name') }}">
 			</div>
 			<div class="form-group">
-				<input rows="10" name="mobile_no" class="form-control" type="text"
-					placeholder="{{ _('Contact Number') }}">
-			</div>
-			<div class="form-group">
-				<input rows="10" name="url" class="form-control" type="text" placeholder="{{ _('Url') }}">
-			</div>
-			<div class="form-group">
+				<label class="form-label">{{ _('Email') }}<span class="required-star">*</span></label>
 				<input class="form-control" name="email" type="text" placeholder="{{ _('Your email address') }}" />
 			</div>
 			<div class="form-group">
-				<input rows="10" name="postal_code" class="form-control" type="text"
-					placeholder="{{ _('Postal Code') }}">
+				<label class="form-label">{{ _('Contact Number') }}</label>
+				<input rows="10" name="mobile_no" class="form-control" type="text"
+					placeholder="{{ _('Contact Number') }}">
 			</div>
+			<input type="hidden" name="url" id="enquiry-url">
 			<div class="form-group">
+				<label class="form-label">{{ _('Organisation Name') }}</label>
 				<input rows="10" name="organisation_name" class="form-control"
 					placeholder="{{ _('Organisation Name') }}">
 			</div>
 			<div class="form-group">
+				<label class="form-label">{{ _('Message') }}</label>
 				<textarea rows="10" name="message" class="form-control" placeholder="{{ _('Message') }}"></textarea>
 			</div>
 			<div class="form-group">
-				<button class="btn btn-primary btn-send">{{ _("Send my Enquiry") }}</button>
+				<button class="btn btn-primary btn-send">{{ _("Send My Enquiry") }}</button>
 			</div>
 		</div>
 	</div>
 </div>
 <script>
+	// Auto-fill the hidden URL field with the referring page
+	document.getElementById('enquiry-url').value = document.referrer || window.location.href;
+
 	{% include "kersten_erpnext/web_template/contact_form/contact_form.js" %}
 </script>
 {% endblock %}
