@@ -1,0 +1,20 @@
+[project]
+name = "kersten_erpnext"
+authors = [
+    { name = "Kersten", email = "info@finbyz.tech" }
+]
+description = "Custom App for building item web pages from page builder"
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = [
+    # frappe and erpnext are managed by bench — do NOT list them here.
+    # uv/bench will reject transitive git URL deps (e.g. pypika) if frappe is listed.
+]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.dev-dependencies]
+# package_name = "~=1.1.0"
