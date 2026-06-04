@@ -147,5 +147,6 @@ update_website_context = ["kersten_erpnext.templates.generators.item.item.set_pa
 
 fixtures = [
     {"dt": "Custom Field","filters": [["module", "=","Kersten Erpnext"]]},
+    {"dt": "Property Setter", "filters": [["module", "=","Kersten Erpnext"]]}
 ]
 
