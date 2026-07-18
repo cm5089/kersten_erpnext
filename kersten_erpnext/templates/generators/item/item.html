@@ -20,6 +20,14 @@
 		{% if override_page_builder %}
 			<!-- Start of product template -->
 			{% include "templates/generators/item/section_buttons.html" %}
+			{% if doc.has_long_description() %}
+				<div class="container item-website-long-description" id="LongDescription">
+					<h2>Description</h2>
+					<div class="long-description">
+						{{ _(doc.web_long_description) | safe }}
+					</div>
+				</div>
+			{% endif %}
 			{% if doc.has_specification() %}
 				{% include "templates/generators/item/item_specifications.html" %}
 			{% endif %}
