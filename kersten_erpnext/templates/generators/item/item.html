@@ -16,10 +16,14 @@
 				{% include "templates/generators/item/item_image.html" %}
 				{% include "templates/generators/item/item_details.html" %}
 			</div>
-			{% include "templates/generators/item/item_specifications.html" %}
 		</div>
-
-		{% if doc.content_type == 'Page Builder' %}
+		{% if override_page_builder %}
+			<!-- Start of product template -->
+			{% include "templates/generators/item/section_buttons.html" %}
+			{% if doc.has_specification() %}
+				{% include "templates/generators/item/item_specifications.html" %}
+			{% endif %}
+		{% elif doc.content_type == 'Page Builder' %}
 			{{ page_builder_html }}
 		{% else %}
 			{{ doc.website_content or '' }}
