@@ -1,14 +1,14 @@
 <section class="section section-padding-top section-padding-bottom">
     <div class="container">
         <div class="quick-link-btn-container">
-            {% if doc.has_specification() %}
-                <a class="quick-link-btn" href="#Specifications">
-                    <h4>Specifications</h4>
-                </a>
-            {% endif %}
             {% if doc.has_long_description() %}
                 <a class="quick-link-btn" href="#LongDescription">
                     <h4>Description</h4>
+                </a>
+            {% endif %}
+            {% if doc.has_specification() %}
+                <a class="quick-link-btn" href="#Specifications">
+                    <h4>Specifications</h4>
                 </a>
             {% endif %}
         </div>
