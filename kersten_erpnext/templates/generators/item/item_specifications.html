@@ -1,0 +1,29 @@
+<!-- Is reused to render within tabs as well as independently -->
+{% if website_specifications %}
+<div class="container item-website-specification" id="Specifications">
+	<h2>Specification</h2>
+	<table class="table">
+		{% for d in website_specifications -%}
+			{% set field_type = frappe.get_doc("Item Website Specification Field Type", _(d.custom_field_type)) %}
+			<tr>
+				<td class="spec-label">
+					<svg class="spec_icon icon icon-md">
+						<use class href="/assets/frappe/icons/lucide/icons.svg#icon-{{ _(field_type.specification_icon) }}"></use>
+					</svg>
+					{{ _(field_type.display_label) }}
+					{% if (d.custom_diagram_key or "")|trim %}
+						({{ d.custom_diagram_key|trim }})
+					{% endif %}
+				</td>
+				<td class="spec-content">
+					{{ _(d.description) }}
+				</td>
+			</tr>
+		{%- endfor %}
+	</table>
+	<div id="SpecificationDiagram">
+		<img src="{{ doc.custom_measurements_diagram }}" alt="Specification Diagram" class="img-fluid">
+	</div>
+
+</div>
+{% endif %}
