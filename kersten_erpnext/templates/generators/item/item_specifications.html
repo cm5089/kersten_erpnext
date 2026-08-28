@@ -21,9 +21,11 @@
 			</tr>
 		{%- endfor %}
 	</table>
+	{% if doc.custom_measurements_diagram and doc.custom_measurements_diagram|trim %}
 	<div id="SpecificationDiagram">
 		<img src="{{ doc.custom_measurements_diagram }}" alt="Specification Diagram" class="img-fluid">
 	</div>
+	{% endif %}
 
 </div>
 {% endif %}
