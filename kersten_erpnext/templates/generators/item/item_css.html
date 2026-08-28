@@ -1,0 +1,92 @@
+<style>
+/* --- 1. Grid Layout --- */
+	/* Mobile default: 1 Column */
+	.fact-grid {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 16px;
+		align-items: stretch; /* Forces rows to match the tallest card */
+		padding: 10px 0px 20px 0px;
+	}
+
+	/* Tablet: 2 Columns */
+	@media (min-width: 600px) {
+		.fact-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	/* Desktop: 4 Columns */
+	@media (min-width: 1024px) {
+		.fact-grid {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+
+	/* --- 2. Card Styling --- */
+	.fact-card {
+		background: #fff;
+		border: 1px solid #d8e3db;
+		border-radius: 14px;
+		padding: 21px;
+		box-shadow: 0 8px 24px rgba(0,52,26,.06);
+
+		/* Flexbox ensures inner content spaces out evenly if cards are stretched */
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-start;
+		height: 100%;
+		min-width: 0; /* Ensures text truncation works properly in flex containers */
+	}
+
+	.fact-card a {
+		text-decoration: none; /* Removes underline from links */
+		color: inherit; /* Ensures text color remains consistent */
+	}
+
+	/* --- 3. Typography & Truncation --- */
+	.fact-label {
+		font-size: 11px;
+		color: #6c7770;
+		font-weight: 900;
+		letter-spacing: 1px;
+		text-transform: uppercase;
+		text-overflow:ellipsis;
+		white-space: nowrap;
+		overflow:hidden;
+	}
+
+	.fact-value {
+		font-size: 25px;
+		line-height: 1.1;
+		color: #004d26; /* Updated to a darker green for better contrast */
+		font-weight: 900;
+		margin: 8px 0;
+
+		/* Multi-line truncation for the green values */
+		display: -webkit-box;
+		-webkit-line-clamp: 3; /* Allows up to 3 lines before adding '...' */
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		word-wrap: break-word; /* Ensures long words don't break the layout */
+		white-space: nowrap;
+		text-overflow:ellipsis;
+		white-space: nowrap;
+	}
+
+	.fact-card p {
+		font-size: 13px;
+		color: #5f6962;
+		margin: 0;
+
+		/* Multi-line truncation for standard paragraph text */
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	div.product-description {
+		padding: 10px;
+	}
+</style>
