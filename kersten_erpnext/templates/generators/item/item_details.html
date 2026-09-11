@@ -85,7 +85,9 @@
 				{% endfor %}
 			</div>
 		{% endif %}
-		{{ doc.short_description | safe }}
+		{% if frappe.utils.strip_html(doc.short_description or '') %}
+			{{ doc.short_description | safe }}
+		{% endif %}
 	{% else %}
 		<!-- Old Page Builder content -->
 		{% if frappe.utils.strip_html(doc.web_long_description or '') %}
