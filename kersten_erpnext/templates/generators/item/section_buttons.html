@@ -12,32 +12,34 @@
                 </a>
             {% endif %}
 
-            {% if doc.has_recommended_items("Related Item") %}
+            {% set related_items = doc.get_recommended_items_by_group() %}
+
+            {% if "Related Item" in related_items.keys() %}
                 <a class="quick-link-btn" href="#RelatedItems">
                     <h4>Related Items</h4>
                 </a>
             {% endif %}
-            {% if doc.has_recommended_items("Series/Collection") %}
+            {% if "Series/Collection" in related_items.keys() %}
                 <a class="quick-link-btn" href="#SeriesCollection">
                     <h4>More from this Series</h4>
                 </a>
             {% endif %}
-            {% if doc.has_recommended_items("Required Extra") %}
+            {% if "Required Extra" in related_items.keys() %}
                 <a class="quick-link-btn" href="#RequiredExtras">
                     <h4>Required Extras</h4>
                 </a>
             {% endif %}
-            {% if doc.has_recommended_items("Optional Accessory") %}
+            {% if "Optional Accessory" in related_items.keys() %}
                 <a class="quick-link-btn" href="#OptionalAccessories">
                     <h4>Optional Accessories</h4>
                 </a>
             {% endif %}
-            {% if doc.has_recommended_items("Consumable") %}
+            {% if "Consumable" in related_items.keys() %}
                 <a class="quick-link-btn" href="#Consumables">
                     <h4>Consumables</h4>
                 </a>
             {% endif %}
-            {% if doc.has_recommended_items("Download") %}
+            {% if "Download" in related_items.keys() %}
                 <a class="quick-link-btn" href="#Downloads">
                     <h4>Downloads</h4>
                 </a>
