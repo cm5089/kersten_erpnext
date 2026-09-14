@@ -61,25 +61,6 @@
 			{% include "templates/generators/item/item_reviews.html"%}
 		{% endif %}
 	</div>
-
-	<!-- Additional Info/Reviews, Recommendations -->
-	<div class="d-flex">
-		{% set show_recommended_items = recommended_items and shopping_cart.cart_settings.enable_recommendations %}
-		{% set info_col = 'col-9' if show_recommended_items else 'col-12' %}
-		{% set padding_top = 'pt-0' if (show_tabs and tabs) else '' %}
-
-		<!-- Recommended Items -->
-		{% if show_recommended_items %}
-			<div class="mt-4 col-3 recommended-item-section">
-				<span class="recommendation-header">Recommended</span>
-				<div class="product-container mt-2 recommendation-container">
-					{% for item in recommended_items %}
-						{{ recommended_item_row(item) }}
-					{% endfor %}
-				</div>
-			</div>
-		{% endif %}
-	</div>
 </div>
 
 {% if doc.faq_group %}
