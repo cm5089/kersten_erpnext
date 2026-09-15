@@ -9,6 +9,10 @@
         "Download": "Downloads",
         "Series/Collection": "More from this Series",
         "Related Item": "Related Items",
+        "Power Unit": "Compatible Power Units",
+        "Linkage": "Compatible Linkage",
+        "Attachment": "Compatible Attachments",
+        "Bracket": "Compatible Brackets",
     } %}
 {% set SECTION_ANCHORS = {
         "SYSTEMID": "ANCHOR_TAG",
@@ -18,6 +22,10 @@
         "Download": "Downloads",
         "Series/Collection": "SeriesCollection",
         "Related Item": "RelatedItems",
+        "Power Unit": "CompatiblePowerUnits",
+        "Linkage": "CompatibleLinkage",
+        "Attachment": "CompatibleAttachments",
+        "Bracket": "CompatibleBrackets",
     } %}
 
 <section class="section section-padding-top section-padding-bottom" data-section-idx="4"
@@ -33,7 +41,8 @@
 
             <div class="row">
 
-                {% for website_item_code in related_items_by_groups[section_title] %}
+                {% set items_to_loop = related_items_by_groups[section_title] or compatible_items_by_groups[section_title] %}
+                {% for website_item_code in items_to_loop %}
                     {% set website_item = frappe.get_doc("Website Item", website_item_code) %}
                     <div class="col-sm-3 item-card">
                         <div class="card align-items-center" style="height: 360px;">

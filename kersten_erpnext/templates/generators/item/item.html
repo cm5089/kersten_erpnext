@@ -67,6 +67,30 @@
 				{% include "templates/generators/item/item_related_item_section.html" %}
 			{% endif %}
 
+			<!-- Related Items - Compatible Power Units -->
+			{% set section_title = "Power Unit" %}
+			{% if section_title in compatible_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Compatible Linkage -->
+			{% set section_title = "Linkage" %}
+			{% if section_title in compatible_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Attachments -->
+			{% set section_title = "Attachment" %}
+			{% if section_title in compatible_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Brackets -->
+			{% set section_title = "Bracket" %}
+			{% if section_title in compatible_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
 			<!-- Related Items - Series/Collection -->
 			{% set section_title = "Series/Collection" %}
 			{% if section_title in related_items_by_groups.keys() %}

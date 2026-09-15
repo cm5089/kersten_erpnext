@@ -32,6 +32,26 @@
                     <h4>Downloads</h4>
                 </a>
             {% endif %}
+            {% if "Power Unit" in compatible_items_by_groups.keys() %}
+                <a class="quick-link-btn" href="#CompatiblePowerUnits">
+                    <h4>Compatible Power Units</h4>
+                </a>
+            {% endif %}
+            {% if "Linkage" in compatible_items_by_groups.keys() %}
+                <a class="quick-link-btn" href="#CompatibleLinkage">
+                    <h4>Compatible Linkage</h4>
+                </a>
+            {% endif %}
+            {% if "Attachment" in compatible_items_by_groups.keys() %}
+                <a class="quick-link-btn" href="#CompatibleAttachments">
+                    <h4>Compatible Attachments</h4>
+                </a>
+            {% endif %}
+            {% if "Bracket" in compatible_items_by_groups.keys() %}
+                <a class="quick-link-btn" href="#CompatibleBrackets">
+                    <h4>Compatible Brackets</h4>
+                </a>
+            {% endif %}
             {% if "Series/Collection" in related_items_by_groups.keys() %}
                 <a class="quick-link-btn" href="#SeriesCollection">
                     <h4>More from this Series</h4>
