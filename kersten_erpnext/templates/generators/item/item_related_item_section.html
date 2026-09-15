@@ -1,0 +1,64 @@
+<!-- NB: Set "section_title" before calling this template -->
+
+{% set PLACEHOLDER_IMAGE = "/private/files/webstore_placeholder.png" %}
+{% set SECTION_TITLES = {
+        "SYSTEMID": "HUMAN READABLE TITLE",
+        "Consumable": "Consumables",
+        "Required Extra": "Required Extras",
+        "Optional Accessory": "Optional Accessories",
+        "Download": "Downloads",
+        "Series/Collection": "More from this Series",
+        "Related Item": "Related Items",
+    } %}
+{% set SECTION_ANCHORS = {
+        "SYSTEMID": "ANCHOR_TAG",
+        "Consumable": "Consumables",
+        "Required Extra": "RequiredExtras",
+        "Optional Accessory": "OptionalAccessories",
+        "Download": "Downloads",
+        "Series/Collection": "SeriesCollection",
+        "Related Item": "RelatedItems",
+    } %}
+
+<section class="section section-padding-top section-padding-bottom" data-section-idx="4"
+    data-section-template="Item Card Group" id="{{ SECTION_ANCHORS[section_title] or '' }}">
+    <div class="container">
+        <div class="section-with-cards item-card-group-section">
+            <div class="item-group-header d-flex justify-content-between">
+                <div class="title-section">
+                    <h2 class="section-title">{{ SECTION_TITLES[section_title] or "Related Items" }}</h2>
+                </div>
+                <div class="primary-action-section"></div>
+            </div>
+
+            <div class="row">
+
+                {% for website_item_code in related_items_by_groups[section_title] %}
+                    {% set website_item = frappe.get_doc("Website Item", website_item_code) %}
+                    <div class="col-sm-3 item-card">
+                        <div class="card align-items-center" style="height: 360px;">
+                            <div class="card-img-container">
+                                <a href="{{ website_item.get_clean_route() }}" style="text-decoration: none;">
+                                    <img alt="{{ website_item.web_item_name }}" class="card-img" src="{{ website_item.website_image or PLACEHOLDER_IMAGE }}">
+                                </a>
+                            </div>
+                            <div class="card-body text-center" style="width:100%">
+                                <div class="mt-4">
+                                    <a href="{{ website_item.get_clean_route() }}">
+                                        <div class="product-title">
+                                            {{ website_item.web_item_name }}
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="product-category">
+                                    {{website_item.item_group}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+</section>

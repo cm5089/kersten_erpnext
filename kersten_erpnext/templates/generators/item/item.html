@@ -23,8 +23,12 @@
 			</div>
 		</div>
 		{% if override_page_builder %}
+
 			<!-- Start of product template -->
+			<!-- Display Navigation Buttons -->
 			{% include "templates/generators/item/section_buttons.html" %}
+
+			<!-- Long Website Description -->
 			{% if doc.has_long_description() %}
 				<div class="container item-website-long-description" id="LongDescription">
 					<h2>Description</h2>
@@ -33,9 +37,48 @@
 					</div>
 				</div>
 			{% endif %}
+
+			<!-- Specification Table -->
 			{% if doc.has_specification() %}
 				{% include "templates/generators/item/item_specifications.html" %}
 			{% endif %}
+
+			<!-- Related Items - Required Extras -->
+			{% set section_title = "Required Extra" %}
+			{% if section_title in related_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Consumables -->
+			{% set section_title = "Consumable" %}
+			{% if section_title in related_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Optional Accessories -->
+			{% set section_title = "Optional Accessory" %}
+			{% if section_title in related_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Downloads -->
+			{% set section_title = "Download" %}
+			{% if section_title in related_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Series/Collection -->
+			{% set section_title = "Series/Collection" %}
+			{% if section_title in related_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
+			<!-- Related Items - Related Products -->
+			{% set section_title = "Related Item" %}
+			{% if section_title in related_items_by_groups.keys() %}
+				{% include "templates/generators/item/item_related_item_section.html" %}
+			{% endif %}
+
 		{% elif doc.content_type == 'Page Builder' %}
 			{{ page_builder_html }}
 		{% else %}
