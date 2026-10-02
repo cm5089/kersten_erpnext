@@ -85,6 +85,15 @@
 				{% include "templates/generators/item/item_related_item_section.html" %}
 			{% endif %}
 
+			<!-- Fitment Wizard Widget-->
+			<div class="container item-fitment-wizard" id="FitmentWizard">
+				{%- block fitment_widget -%}
+					{{ web_block(
+						'Website Item - Fitment Finder',
+					) }}
+				{%- endblock -%}
+			</div>
+
 			<!-- Related Items - Brackets -->
 			{% set section_title = "CompatibleBrackets" %}
 			{% if section_title in compatible_items_by_groups.keys() %}
@@ -104,7 +113,18 @@
 			{% endif %}
 
 		{% elif doc.content_type == 'Page Builder' %}
+			<!-- Use Page Builder Content instead -->
 			{{ page_builder_html }}
+
+			<!-- Fitment Wizard Widget-->
+			<div class="container item-fitment-wizard" id="FitmentWizard">
+				{%- block fitment_widget_page_builder -%}
+					{{ web_block(
+						'Website Item - Fitment Finder',
+					) }}
+				{%- endblock -%}
+			</div>
+
 		{% else %}
 			{{ doc.website_content or '' }}
 		{% endif %}
