@@ -25,8 +25,19 @@
 		{% if override_page_builder %}
 
 			<!-- Start of product template -->
+
+			<!-- Web Template Injection - Above Button Section -->
+			{% for template in web_templates["above_buttons"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+
 			<!-- Display Navigation Buttons -->
 			{% include "templates/generators/item/section_buttons.html" %}
+
+			<!-- Web Template Injection - Below Button Section -->
+			{% for template in web_templates["below_buttons"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
 
 			<!-- Long Website Description -->
 			{% if doc.has_long_description() %}
@@ -38,10 +49,20 @@
 				</div>
 			{% endif %}
 
+			<!-- Web Template Injection - Below Description -->
+			{% for template in web_templates["below_description"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+
 			<!-- Specification Table -->
 			{% if doc.has_specification() %}
 				{% include "templates/generators/item/item_specifications.html" %}
 			{% endif %}
+
+			<!-- Web Template Injection - Below Specification -->
+			{% for template in web_templates["below_specification"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
 
 			<!-- Related Items - Required Extras -->
 			{% set section_title = "RequiredExtras" %}
@@ -85,15 +106,6 @@
 				{% include "templates/generators/item/item_related_item_section.html" %}
 			{% endif %}
 
-			<!-- Fitment Wizard Widget-->
-			<div class="container item-fitment-wizard" id="FitmentWizard">
-				{%- block fitment_widget -%}
-					{{ web_block(
-						'Website Item - Fitment Finder',
-					) }}
-				{%- endblock -%}
-			</div>
-
 			<!-- Related Items - Brackets -->
 			{% set section_title = "CompatibleBrackets" %}
 			{% if section_title in compatible_items_by_groups.keys() %}
@@ -112,18 +124,34 @@
 				{% include "templates/generators/item/item_related_item_section.html" %}
 			{% endif %}
 
+			<!-- Web Template Injection - End of Page -->
+			{% for template in web_templates["end_of_page"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+
 		{% elif doc.content_type == 'Page Builder' %}
 			<!-- Use Page Builder Content instead -->
+
+			<!-- Web Template Injection - Page Builder edition - top -->
+			{% for template in web_templates["before_buttons"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+
 			{{ page_builder_html }}
 
-			<!-- Fitment Wizard Widget-->
-			<div class="container item-fitment-wizard" id="FitmentWizard">
-				{%- block fitment_widget_page_builder -%}
-					{{ web_block(
-						'Website Item - Fitment Finder',
-					) }}
-				{%- endblock -%}
-			</div>
+			<!-- Web Template Injection - Page Builder edition - bottom -->
+			{% for template in web_templates["end_of_page"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+			{% for template in web_templates["after_buttons"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+			{% for template in web_templates["below_description"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
+			{% for template in web_templates["below_specification"] %}
+				{{ web_block(template.template) }}
+			{% endfor %}
 
 		{% else %}
 			{{ doc.website_content or '' }}
