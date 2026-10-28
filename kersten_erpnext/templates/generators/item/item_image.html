@@ -1,0 +1,213 @@
+{% set column_size = 5 if slides else 4 %}
+{% set gallery_id = 'product-gallery-' + frappe.utils.generate_hash(length=8) %}
+<div class="col-md-{{ column_size }} h-100 d-flex mb-4">
+	{% if slides %}
+	<div class="product-gallery w-100" data-gallery="{{ gallery_id }}">
+		<div id="{{ gallery_id }}" class="carousel slide carousel-fade product-gallery-main"
+			data-ride="carousel"
+			data-interval="{{ (slideshow.interval if slideshow) or 5000 }}">
+			{% if slides | len > 1 %}
+			<ol class="carousel-indicators">
+				{% for slide in slides %}
+				<li data-target="#{{ gallery_id }}" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
+				{% endfor %}
+			</ol>
+			{% endif %}
+
+			<div class="carousel-inner rounded-4 overflow-hidden shadow-lg">
+				{% for slide in slides %}
+				<div class="carousel-item {% if loop.first %}active{% endif %}">
+					<img
+						src="{{ slide.image }}"
+						class="d-block w-100 object-fit-cover rounded-4"
+						alt="{{ slide.heading or doc.item_name }}"
+						loading="lazy"
+					>
+					{% if slide.heading or slide.description %}
+					<div class="carousel-caption d-none d-md-flex flex-column align-items-start text-left">
+						<div class="bg-dark bg-opacity-50 rounded-3 p-3">
+							{% if slide.heading %}<h5 class="mb-1">{{ slide.heading }}</h5>{% endif %}
+							{% if slide.description %}<p class="mb-0 small">{{ slide.description }}</p>{% endif %}
+						</div>
+					</div>
+					{% endif %}
+				</div>
+				{% endfor %}
+			</div>
+
+			{% if slides | len > 1 %}
+			<a class="carousel-control-prev" href="#{{ gallery_id }}" role="button" data-slide="prev">
+				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+				<span class="sr-only">{{ _('Previous') }}</span>
+			</a>
+			<a class="carousel-control-next" href="#{{ gallery_id }}" role="button" data-slide="next">
+				<span class="carousel-control-next-icon" aria-hidden="true"></span>
+				<span class="sr-only">{{ _('Next') }}</span>
+			</a>
+			{% endif %}
+		</div>
+
+		{% if slides | len > 1 %}
+		<div class="product-gallery-thumbs d-none d-md-flex mt-3">
+			{% for slide in slides %}
+			<button
+				type="button"
+				class="gallery-thumb {% if loop.first %}active{% endif %}"
+				data-gallery-thumb="{{ gallery_id }}"
+				data-slide-index="{{ loop.index0 }}"
+				aria-label="{{ slide.heading or _('Slide {0}').format(loop.index) }}"
+			>
+				<img src="{{ slide.image }}" alt="{{ slide.heading or doc.item_name }}" loading="lazy">
+			</button>
+			{% endfor %}
+		</div>
+		{% endif %}
+	</div>
+	{% else %}
+		{{ product_image(doc.website_image, '', doc.website_image_alt or doc.item_name) }}
+	{% endif %}
+
+	<!-- Simple image preview -->
+
+	<div class="image-zoom-view" style="display: none;">
+		<button type="button" class="close" aria-label="Close">
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+			stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+	</div>
+</div>
+<style>
+	.website-image {
+		cursor: pointer;
+	}
+
+	.product-gallery-main .carousel-inner {
+		background: #f8f9fb;
+	}
+
+	.product-gallery-main img {
+		min-height: 320px;
+		max-height: 520px;
+		object-fit: cover;
+		border-radius: 1.5rem;
+	}
+
+	.product-gallery .carousel-indicators li {
+		width: 48px;
+		height: 4px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.4);
+		margin: 0 8px;
+	}
+
+	.product-gallery .carousel-indicators .active {
+		background: #fff;
+	}
+
+	.product-gallery-thumbs .gallery-thumb {
+		border: 0;
+		padding: 0;
+		margin-right: 0.75rem;
+		border-radius: 0.75rem;
+		overflow: hidden;
+		width: 80px;
+		height: 80px;
+		cursor: pointer;
+		opacity: 0.6;
+		transition: opacity 0.2s ease, transform 0.2s ease;
+	}
+
+	.product-gallery-thumbs .gallery-thumb.active,
+	.product-gallery-thumbs .gallery-thumb:hover {
+		opacity: 1;
+		transform: translateY(-2px);
+	}
+
+	.product-gallery-thumbs img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: inherit;
+	}
+
+	.image-zoom-view {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 100vh;
+		width: 100vw;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: rgba(0, 0, 0, 0.8);
+		z-index: 1080;
+	}
+
+	.image-zoom-view img {
+		max-height: 100%;
+		max-width: 100%;
+	}
+
+	.image-zoom-view button {
+		position: absolute;
+		right: 3rem;
+		top: 2rem;
+	}
+
+	.image-zoom-view svg {
+		color: var(--white);
+	}
+</style>
+<script>
+	frappe.ready(() => {
+		const galleryId = '{{ gallery_id }}';
+		const $carousel = $('#{{ gallery_id }}');
+
+		$('[data-gallery-thumb="{{ gallery_id }}"]').on('click', function () {
+			const index = $(this).data('slide-index');
+			$carousel.carousel(index);
+		});
+
+		$carousel.on('slide.bs.carousel', function (e) {
+			const to = e.to;
+			const selector = `[data-gallery-thumb="{{ gallery_id }}"]`;
+			$(selector).removeClass('active');
+			$(`${selector}[data-slide-index="${to}"]`).addClass('active');
+		});
+
+		const $zoom_wrapper = $('.image-zoom-view');
+
+		$('.website-image').on('click', (e) => {
+			e.preventDefault();
+			const $img = $(e.target);
+			const src = $img.prop('src');
+			if (!src) return;
+			show_preview(src);
+		});
+
+		$zoom_wrapper.on('click', 'button', hide_preview);
+
+		$(document).on('keydown', (e) => {
+			if (e.key === 'Escape') {
+				hide_preview();
+			}
+		});
+
+		function show_preview(src) {
+			$zoom_wrapper.show();
+			const $img = $(`<img src="${src}">`)
+			$zoom_wrapper.append($img);
+		}
+
+		function hide_preview() {
+			$zoom_wrapper.find('img').remove();
+			$zoom_wrapper.hide();
+		}
+	})
+</script>
+
