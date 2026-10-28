@@ -1,6 +1,7 @@
 {% set column_size = 5 if slides else 4 %}
 {% set gallery_id = 'product-gallery-' + frappe.utils.generate_hash(length=8) %}
-<div class="col-md-{{ column_size }} h-100 d-flex mb-4">
+<div class="col-md-{{ column_size }} product-hero-image h-100 d-flex mb-4">
+	<div class="product-hero-media w-100">
 	{% if slides %}
 	<div class="product-gallery w-100" data-gallery="{{ gallery_id }}">
 		<div id="{{ gallery_id }}" class="carousel slide carousel-fade product-gallery-main"
@@ -66,6 +67,16 @@
 	{% else %}
 		{{ product_image(doc.website_image, '', doc.website_image_alt or doc.item_name) }}
 	{% endif %}
+
+	{% if shopping_cart.cart_settings.enable_wishlist %}
+		<div class="like-action-item-fp like-action {{ 'like-action-wished' if wished else '' }}"
+			data-item-code="{{ doc.item_code }}">
+			<svg class="icon sm">
+				<use class="{{ 'wished' if wished else 'not-wished' }} wish-icon" href="#icon-heart"></use>
+			</svg>
+		</div>
+	{% endif %}
+	</div>
 
 	<!-- Simple image preview -->
 
