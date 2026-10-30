@@ -23,6 +23,9 @@
                             <img alt="{{ website_item.web_item_name }}" src="{{ website_item.website_image or PLACEHOLDER_IMAGE }}" loading="lazy">
                         </div>
                         <div class="item-card-body">
+                            {% if website_item.item_group %}
+                                <span class="item-card-tag">{{ _(website_item.item_group) }}</span>
+                            {% endif %}
                             <p class="item-card-code">{{ website_item.item_code }}</p>
                             <h4>{{ website_item.web_item_name }}</h4>
                             {% if short_text %}
