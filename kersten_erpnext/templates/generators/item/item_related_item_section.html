@@ -11,32 +11,29 @@
                 <div class="primary-action-section"></div>
             </div>
 
-            <div class="row">
+            <div class="item-card-grid">
 
                 {% set items_to_loop = related_items_by_groups[section_title] or compatible_items_by_groups[section_title] %}
                 {% for website_item_code in items_to_loop %}
                     {% set website_item = frappe.get_doc("Website Item", website_item_code) %}
-                    <div class="col-sm-3 item-card">
-                        <div class="card align-items-center" style="height: 360px;">
-                            <div class="card-img-container">
-                                <a href="{{ website_item.get_clean_route() }}" style="text-decoration: none;">
-                                    <img alt="{{ website_item.web_item_name }}" class="card-img" src="{{ website_item.website_image or PLACEHOLDER_IMAGE }}">
-                                </a>
-                            </div>
-                            <div class="card-body text-center" style="width:100%">
-                                <div class="mt-4">
-                                    <a href="{{ website_item.get_clean_route() }}">
-                                        <div class="product-title">
-                                            {{ website_item.web_item_name }}
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="product-category">
-                                    {{website_item.item_group}}
-                                </div>
-                            </div>
+                    {% set formatted_price = website_item.get_card_price() %}
+                    {% set short_text = frappe.utils.strip_html(website_item.short_description or "") | trim %}
+                    <a class="item-card" href="{{ website_item.get_clean_route() }}">
+                        <div class="item-card-media">
+                            <img alt="{{ website_item.web_item_name }}" src="{{ website_item.website_image or PLACEHOLDER_IMAGE }}" loading="lazy">
                         </div>
-                    </div>
+                        <div class="item-card-body">
+                            <p class="item-card-code">{{ website_item.item_code }}</p>
+                            <h4>{{ website_item.web_item_name }}</h4>
+                            {% if short_text %}
+                                <p class="item-card-copy">{{ short_text }}</p>
+                            {% endif %}
+                            {% if formatted_price %}
+                                <p class="item-card-price">{{ formatted_price }}</p>
+                            {% endif %}
+                            <span class="item-card-arrow">View product →</span>
+                        </div>
+                    </a>
                 {% endfor %}
 
             </div>
