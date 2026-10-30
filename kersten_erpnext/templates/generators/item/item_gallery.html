@@ -1,0 +1,173 @@
+<div class="container item-website-gallery" id="Gallery">
+	<h2>Gallery</h2>
+	<p class="product-gallery-status">Gallery images load as you reach this section.</p>
+	<div class="product-gallery-grid" hidden></div>
+</div>
+<dialog class="product-gallery-lightbox" id="ProductGalleryLightbox">
+	<button type="button" class="product-gallery-nav product-gallery-prev" aria-label="Previous" hidden></button>
+	<img alt="">
+	<video controls playsinline hidden></video>
+	<button type="button" class="product-gallery-nav product-gallery-next" aria-label="Next" hidden></button>
+</dialog>
+<script>
+(function () {
+	var section = document.getElementById("Gallery");
+	if (!section || section.dataset.galleryBound) {
+		return;
+	}
+	section.dataset.galleryBound = "1";
+
+	var status = section.querySelector(".product-gallery-status");
+	var grid = section.querySelector(".product-gallery-grid");
+	var dialog = document.getElementById("ProductGalleryLightbox");
+	var lightboxImage = dialog && dialog.querySelector("img");
+	var lightboxVideo = dialog && dialog.querySelector("video");
+	var previousButton = dialog && dialog.querySelector(".product-gallery-prev");
+	var nextButton = dialog && dialog.querySelector(".product-gallery-next");
+	var items = [];
+	var current = 0;
+	var started = false;
+
+	function showItem(index) {
+		if (!items.length || !dialog) {
+			return;
+		}
+		current = (index + items.length) % items.length;
+		var item = items[current];
+		var showNav = items.length > 1;
+		previousButton.hidden = !showNav;
+		nextButton.hidden = !showNav;
+		if (item.isVideo) {
+			lightboxImage.hidden = true;
+			lightboxImage.removeAttribute("src");
+			lightboxVideo.hidden = false;
+			lightboxVideo.src = item.full;
+			if (!dialog.open) {
+				dialog.showModal();
+			}
+			lightboxVideo.play();
+			return;
+		}
+		lightboxVideo.pause();
+		lightboxVideo.removeAttribute("src");
+		lightboxVideo.load();
+		lightboxVideo.hidden = true;
+		lightboxImage.hidden = false;
+		lightboxImage.src = item.full;
+		if (!dialog.open) {
+			dialog.showModal();
+		}
+	}
+
+	function show(images) {
+		grid.replaceChildren();
+		items = [];
+		if (!images.length) {
+			status.hidden = false;
+			status.textContent = "No gallery images for this product.";
+			grid.hidden = true;
+			return;
+		}
+		status.hidden = true;
+		grid.hidden = false;
+		images.forEach(function (image) {
+			var thumb = image.thumbnail || image.direct;
+			var full = image.direct || image.thumbnail;
+			var isVideo = image.type === "video";
+			if (!thumb) {
+				return;
+			}
+			var index = items.length;
+			items.push({ full: full, isVideo: isVideo });
+			var link = document.createElement("a");
+			link.href = full;
+			link.className = "product-gallery-item" + (isVideo ? " product-gallery-item-video" : "");
+			var img = document.createElement("img");
+			img.alt = isVideo ? "Product gallery video" : "Product gallery image";
+			img.loading = "lazy";
+			img.src = thumb;
+			link.appendChild(img);
+			if (isVideo) {
+				var play = document.createElement("span");
+				play.className = "product-gallery-play";
+				play.setAttribute("aria-hidden", "true");
+				link.appendChild(play);
+			}
+			link.addEventListener("click", function (event) {
+				if (!dialog || !dialog.showModal) {
+					return;
+				}
+				event.preventDefault();
+				showItem(index);
+			});
+			grid.appendChild(link);
+		});
+	}
+
+	function load() {
+		if (started) {
+			return;
+		}
+		started = true;
+		status.textContent = "Loading gallery…";
+		fetch("/api/method/kersten_erpnext.product_gallery.get_album_images", {
+			credentials: "same-origin",
+			headers: { "Accept": "application/json" }
+		})
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error("Gallery request failed");
+				}
+				return response.json();
+			})
+			.then(function (payload) {
+				show((payload.message && payload.message.images) || []);
+			})
+			.catch(function () {
+				status.hidden = false;
+				status.textContent = "Gallery images could not be loaded.";
+			});
+	}
+
+	if (!("IntersectionObserver" in window)) {
+		load();
+	} else {
+		var observer = new IntersectionObserver(function (entries) {
+			if (entries.some(function (entry) { return entry.isIntersecting; })) {
+				observer.disconnect();
+				load();
+			}
+		}, { rootMargin: "240px 0px" });
+		observer.observe(section);
+	}
+
+	if (dialog) {
+		previousButton.addEventListener("click", function () {
+			showItem(current - 1);
+		});
+		nextButton.addEventListener("click", function () {
+			showItem(current + 1);
+		});
+		dialog.addEventListener("keydown", function (event) {
+			if (event.key === "ArrowLeft") {
+				event.preventDefault();
+				showItem(current - 1);
+			}
+			if (event.key === "ArrowRight") {
+				event.preventDefault();
+				showItem(current + 1);
+			}
+		});
+		dialog.addEventListener("click", function (event) {
+			if (event.target === dialog) {
+				dialog.close();
+			}
+		});
+		dialog.addEventListener("close", function () {
+			lightboxVideo.pause();
+			lightboxVideo.removeAttribute("src");
+			lightboxVideo.load();
+		});
+	}
+})();
+</script>
