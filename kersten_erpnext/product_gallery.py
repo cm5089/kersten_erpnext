@@ -3,11 +3,9 @@ import requests
 from frappe.rate_limiter import rate_limit
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
-# Temporary Chevereto settings. Website Item will supply these later.
+# Temporary album name. Website Item will supply this later.
 # The stored album name has two spaces before the final H.
-GALLERY_ENDPOINT = "http://localhost:8080/api/1/album"
 GALLERY_ALBUM_NAME = "FKM 13060L  H"
-GALLERY_API_TOKEN = "a19efe09b5dc6c3407f579fb4cc0ff43ec927fc415f7810d8d4915cdd14de44c"
 VIDEO_EXTENSIONS = (".mp4", ".webm", ".mov", ".m4v", ".ogv", ".ogg")
 
 
@@ -35,15 +33,29 @@ def get_album_images():
 	return {"images": images}
 
 
+def _gallery_credentials():
+	"""Read the Chevereto endpoint and API token from Chevereto Settings."""
+	settings = frappe.get_single("Chevereto Settings")
+	endpoint = (settings.chevereto_endpoint or "").strip()
+	token = settings.get_password("chevereto_api_token", raise_exception=False)
+	if not endpoint or not token:
+		return None
+	return endpoint, token
+
+
 def _fetch_album():
-	url = _album_url(GALLERY_ENDPOINT)
+	credentials = _gallery_credentials()
+	if not credentials:
+		return {"albums": []}
+	endpoint, token = credentials
+	url = _album_url(endpoint)
 	try:
-		response = _get(url)
+		response = _get(url, token)
 	except requests.ConnectionError:
 		gateway_url = _gateway_url(url)
 		if not gateway_url:
 			raise
-		response = _get(gateway_url)
+		response = _get(gateway_url, token)
 	response.raise_for_status()
 	payload = response.json()
 	if payload.get("status_code") != 200:
@@ -56,10 +68,10 @@ def _album_url(endpoint):
 	return endpoint.rstrip("/") + "/?" + query
 
 
-def _get(url):
+def _get(url, token):
 	response = requests.get(
 		url,
-		headers={"X-API-Key": GALLERY_API_TOKEN},
+		headers={"X-API-Key": token},
 		timeout=8,
 		allow_redirects=False,
 	)
@@ -68,7 +80,7 @@ def _get(url):
 		if location:
 			response = requests.get(
 				_keep_connection_host(url, location),
-				headers={"X-API-Key": GALLERY_API_TOKEN},
+				headers={"X-API-Key": token},
 				timeout=8,
 				allow_redirects=False,
 			)
