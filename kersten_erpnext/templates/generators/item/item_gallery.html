@@ -1,4 +1,4 @@
-<div class="container item-website-gallery" id="Gallery">
+<div class="container item-website-gallery" id="Gallery" data-website-item="{{ doc.name | e }}">
 	<h2>Gallery</h2>
 	<p class="product-gallery-status">Gallery images load as you reach this section.</p>
 	<div class="product-gallery-grid" hidden></div>
@@ -110,7 +110,8 @@
 		}
 		started = true;
 		status.textContent = "Loading gallery…";
-		fetch("/api/method/kersten_erpnext.product_gallery.get_album_images", {
+		var websiteItem = section.dataset.websiteItem || "";
+		fetch("/api/method/kersten_erpnext.product_gallery.get_album_images?website_item=" + encodeURIComponent(websiteItem), {
 			credentials: "same-origin",
 			headers: { "Accept": "application/json" }
 		})

@@ -3,18 +3,15 @@ import requests
 from frappe.rate_limiter import rate_limit
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 
-# Temporary album name. Website Item will supply this later.
-# The stored album name has two spaces before the final H.
-GALLERY_ALBUM_NAME = "FKM 13060L  H"
 VIDEO_EXTENSIONS = (".mp4", ".webm", ".mov", ".m4v", ".ogv", ".ogg")
 
 
 @frappe.whitelist(allow_guest=True, methods=["GET"])
 @rate_limit(limit=60, seconds=60)
-def get_album_images():
-	"""Return thumbnail and full-size URLs for the temporary product album."""
+def get_album_images(website_item=None):
+	"""Return thumbnail and full-size URLs for a Website Item's Chevereto album."""
 	try:
-		payload = _fetch_album()
+		payload = _fetch_album(website_item)
 	except requests.RequestException:
 		frappe.log_error(title="Product gallery request failed")
 		return {"images": []}
@@ -43,12 +40,30 @@ def _gallery_credentials():
 	return endpoint, token
 
 
-def _fetch_album():
+def _album_name(website_item):
+	"""Return the album name stored on a visible Website Item."""
+	if not website_item:
+		return None
+	row = frappe.db.get_value(
+		"Website Item",
+		website_item,
+		["custom_chevereto_album", "published"],
+		as_dict=True,
+	)
+	if not row:
+		return None
+	if not row.published and not frappe.has_permission("Website Item", "read", doc=website_item):
+		return None
+	return (row.custom_chevereto_album or "").strip() or None
+
+
+def _fetch_album(website_item):
+	album_name = _album_name(website_item)
 	credentials = _gallery_credentials()
-	if not credentials:
+	if not album_name or not credentials:
 		return {"albums": []}
 	endpoint, token = credentials
-	url = _album_url(endpoint)
+	url = _album_url(endpoint, album_name)
 	try:
 		response = _get(url, token)
 	except requests.ConnectionError:
@@ -63,8 +78,8 @@ def _fetch_album():
 	return payload
 
 
-def _album_url(endpoint):
-	query = urlencode({"name": GALLERY_ALBUM_NAME}, quote_via=quote)
+def _album_url(endpoint, album_name):
+	query = urlencode({"name": album_name}, quote_via=quote)
 	return endpoint.rstrip("/") + "/?" + query
 
 
