@@ -1,7 +1,7 @@
 import frappe
 import requests
 from frappe.rate_limiter import rate_limit
-from urllib.parse import quote, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qs, quote, urlencode, urlsplit, urlunsplit
 
 VIDEO_EXTENSIONS = (".mp4", ".webm", ".mov", ".m4v", ".ogv", ".ogg")
 
@@ -9,7 +9,7 @@ VIDEO_EXTENSIONS = (".mp4", ".webm", ".mov", ".m4v", ".ogv", ".ogg")
 @frappe.whitelist(allow_guest=True, methods=["GET"])
 @rate_limit(limit=60, seconds=60)
 def get_album_images(website_item=None):
-	"""Return Website Item images first, then images from its Chevereto album."""
+	"""Return Website Item images, then Chevereto media, then its YouTube videos."""
 	images = _erpnext_images(website_item)
 	try:
 		images.extend(_chevereto_images(website_item))
@@ -17,6 +17,7 @@ def get_album_images(website_item=None):
 		frappe.log_error(title="Product gallery request failed")
 	except frappe.DoesNotExistError:
 		pass
+	images.extend(_youtube_images(website_item))
 	return {"images": _dedupe(images)}
 
 
@@ -211,6 +212,56 @@ def _http_url(value):
 	cleaned = _media_url(value)
 	if cleaned and (cleaned.startswith("http://") or cleaned.startswith("https://")):
 		return cleaned
+	return None
+
+
+def _youtube_images(website_item):
+	"""Return one gallery item for each YouTube URL on the Website Item."""
+	if not _visible_website_item(website_item):
+		return []
+	links = frappe.get_all(
+		"YouTube Link",
+		filters={
+			"parent": website_item,
+			"parenttype": "Website Item",
+			"parentfield": "custom_youtube_videos",
+		},
+		fields=["youtube_url"],
+		order_by="idx asc",
+	)
+	images = []
+	for link in links:
+		video = _youtube_record(link.youtube_url)
+		if video:
+			images.append(video)
+	return images
+
+
+def _youtube_record(url):
+	video_id = _youtube_id(url)
+	if not video_id:
+		return None
+	return {
+		"thumbnail": f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg",
+		"direct": f"https://www.youtube.com/embed/{video_id}",
+		"type": "youtube",
+	}
+
+
+def _youtube_id(url):
+	parts = urlsplit(url or "")
+	host = parts.netloc.lower().removeprefix("www.")
+	video_id = None
+	if host == "youtu.be":
+		video_id = parts.path.strip("/").split("/")[0]
+	elif host in ("youtube.com", "m.youtube.com", "youtube-nocookie.com"):
+		if parts.path == "/watch":
+			video_id = (parse_qs(parts.query).get("v") or [None])[0]
+		elif parts.path.startswith(("/embed/", "/shorts/", "/live/")):
+			pieces = [piece for piece in parts.path.split("/") if piece]
+			video_id = pieces[1] if len(pieces) > 1 else None
+	if video_id and len(video_id) == 11 and video_id.replace("-", "").replace("_", "").isalnum():
+		return video_id
 	return None
 
 

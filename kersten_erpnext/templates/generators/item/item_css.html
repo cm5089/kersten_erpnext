@@ -666,17 +666,25 @@
 	}
 
 	.product-gallery-lightbox img,
-	.product-gallery-lightbox video {
+	.product-gallery-lightbox video,
+	.product-gallery-lightbox iframe {
 		display: block;
 		width: 100%;
 		height: auto;
 		max-height: 80vh;
+		border: 0;
 		border-radius: 12px;
 		background: #000;
 	}
 
+	.product-gallery-lightbox iframe {
+		height: min(54vw, 80vh);
+		aspect-ratio: 16 / 9;
+	}
+
 	.product-gallery-lightbox img[hidden],
-	.product-gallery-lightbox video[hidden] {
+	.product-gallery-lightbox video[hidden],
+	.product-gallery-lightbox iframe[hidden] {
 		display: none !important;
 	}
 

@@ -7,6 +7,7 @@
 	<button type="button" class="product-gallery-nav product-gallery-prev" aria-label="Previous" hidden></button>
 	<img alt="">
 	<video controls playsinline hidden></video>
+	<iframe class="product-gallery-youtube" title="YouTube video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen hidden></iframe>
 	<button type="button" class="product-gallery-nav product-gallery-next" aria-label="Next" hidden></button>
 </dialog>
 <script>
@@ -23,6 +24,7 @@
 	var dialog = document.getElementById("ProductGalleryLightbox");
 	var lightboxImage = dialog && dialog.querySelector("img");
 	var lightboxVideo = dialog && dialog.querySelector("video");
+	var lightboxYoutube = dialog && dialog.querySelector("iframe");
 	var previousButton = dialog && dialog.querySelector(".product-gallery-prev");
 	var nextButton = dialog && dialog.querySelector(".product-gallery-next");
 	var items = [];
@@ -67,22 +69,48 @@
 			nextButton.hidden = !showNav;
 		}
 		if (item.isVideo) {
-			lightboxImage.hidden = true;
-			lightboxImage.removeAttribute("src");
+			hideImage();
+			stopFileVideo();
+			stopYoutube();
 			lightboxVideo.hidden = false;
 			lightboxVideo.src = item.full;
-			if (!dialog.open) {
-				dialog.showModal();
-			}
+			showDialog();
 			lightboxVideo.play();
 			return;
 		}
+		if (item.isYoutube) {
+			hideImage();
+			stopFileVideo();
+			lightboxYoutube.hidden = false;
+			lightboxYoutube.src = item.full + "?autoplay=1";
+			showDialog();
+			return;
+		}
+		stopFileVideo();
+		stopYoutube();
+		lightboxImage.hidden = false;
+		lightboxImage.src = item.full;
+		showDialog();
+	}
+
+	function hideImage() {
+		lightboxImage.hidden = true;
+		lightboxImage.removeAttribute("src");
+	}
+
+	function stopFileVideo() {
 		lightboxVideo.pause();
 		lightboxVideo.removeAttribute("src");
 		lightboxVideo.load();
 		lightboxVideo.hidden = true;
-		lightboxImage.hidden = false;
-		lightboxImage.src = item.full;
+	}
+
+	function stopYoutube() {
+		lightboxYoutube.hidden = true;
+		lightboxYoutube.removeAttribute("src");
+	}
+
+	function showDialog() {
 		if (!dialog.open) {
 			dialog.showModal();
 		}
@@ -113,23 +141,24 @@
 			var thumb = image.thumbnail || image.direct;
 			var full = image.direct || image.thumbnail;
 			var isVideo = image.type === "video";
+			var isYoutube = image.type === "youtube";
 			if (!thumb) {
 				return;
 			}
 			var index = items.length;
-			items.push({ full: full, thumb: thumb, isVideo: isVideo });
+			items.push({ full: full, thumb: thumb, isVideo: isVideo, isYoutube: isYoutube });
 			if (!grid) {
 				return;
 			}
 			var link = document.createElement("a");
-			link.href = full;
-			link.className = "product-gallery-item" + (isVideo ? " product-gallery-item-video" : "");
+			link.href = isYoutube ? "#" : full;
+			link.className = "product-gallery-item" + ((isVideo || isYoutube) ? " product-gallery-item-video" : "");
 			var img = document.createElement("img");
-			img.alt = isVideo ? "Product gallery video" : "Product gallery image";
+			img.alt = (isVideo || isYoutube) ? "Product gallery video" : "Product gallery image";
 			img.loading = "lazy";
 			img.src = thumb;
 			link.appendChild(img);
-			if (isVideo) {
+			if (isVideo || isYoutube) {
 				var play = document.createElement("span");
 				play.className = "product-gallery-play";
 				play.setAttribute("aria-hidden", "true");
@@ -232,9 +261,8 @@
 			}
 		});
 		dialog.addEventListener("close", function () {
-			lightboxVideo.pause();
-			lightboxVideo.removeAttribute("src");
-			lightboxVideo.load();
+			stopFileVideo();
+			stopYoutube();
 		});
 	}
 })();
