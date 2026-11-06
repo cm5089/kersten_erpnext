@@ -9,13 +9,68 @@ VIDEO_EXTENSIONS = (".mp4", ".webm", ".mov", ".m4v", ".ogv", ".ogg")
 @frappe.whitelist(allow_guest=True, methods=["GET"])
 @rate_limit(limit=60, seconds=60)
 def get_album_images(website_item=None):
-	"""Return thumbnail and full-size URLs for a Website Item's Chevereto album."""
+	"""Return Website Item images first, then images from its Chevereto album."""
+	images = _erpnext_images(website_item)
 	try:
-		payload = _fetch_album(website_item)
+		images.extend(_chevereto_images(website_item))
 	except requests.RequestException:
 		frappe.log_error(title="Product gallery request failed")
-		return {"images": []}
+	except frappe.DoesNotExistError:
+		pass
+	return {"images": _dedupe(images)}
 
+
+def _visible_website_item(website_item):
+	if not website_item:
+		return None
+	row = frappe.db.get_value(
+		"Website Item",
+		website_item,
+		["custom_chevereto_album", "published", "website_image", "slideshow"],
+		as_dict=True,
+	)
+	if not row:
+		return None
+	if not row.published and not frappe.has_permission("Website Item", "read", doc=website_item):
+		return None
+	return row
+
+
+def _erpnext_images(website_item):
+	"""Product image first, then each public slide from the Website Slideshow."""
+	row = _visible_website_item(website_item)
+	if not row:
+		return []
+
+	images = []
+	product_image = _image_record(row.website_image)
+	if product_image:
+		images.append(product_image)
+	if not row.slideshow:
+		return images
+
+	slides = frappe.get_all(
+		"Website Slideshow Item",
+		filters={"parent": row.slideshow, "parenttype": "Website Slideshow"},
+		fields=["image"],
+		order_by="idx asc",
+	)
+	for slide in slides:
+		image = _image_record(slide.image)
+		if image:
+			images.append(image)
+	return images
+
+
+def _image_record(url):
+	cleaned = _media_url(url)
+	if not cleaned:
+		return None
+	return {"thumbnail": cleaned, "direct": cleaned, "type": "image"}
+
+
+def _chevereto_images(website_item):
+	payload = _fetch_album(website_item)
 	images = []
 	for album in payload.get("albums") or []:
 		for image in album.get("images") or []:
@@ -27,7 +82,26 @@ def get_album_images(website_item=None):
 					"direct": direct or thumbnail,
 					"type": _media_type(direct or thumbnail),
 				})
-	return {"images": images}
+	return images
+
+
+def _dedupe(images):
+	unique = []
+	seen = set()
+	for image in images:
+		key = _image_key(image.get("direct") or image.get("thumbnail"))
+		if not key or key in seen:
+			continue
+		seen.add(key)
+		unique.append(image)
+	return unique
+
+
+def _image_key(url):
+	parts = urlsplit(url or "")
+	if not parts.path:
+		return None
+	return (parts.path, parts.query)
 
 
 def _gallery_credentials():
@@ -42,17 +116,8 @@ def _gallery_credentials():
 
 def _album_name(website_item):
 	"""Return the album name stored on a visible Website Item."""
-	if not website_item:
-		return None
-	row = frappe.db.get_value(
-		"Website Item",
-		website_item,
-		["custom_chevereto_album", "published"],
-		as_dict=True,
-	)
+	row = _visible_website_item(website_item)
 	if not row:
-		return None
-	if not row.published and not frappe.has_permission("Website Item", "read", doc=website_item):
 		return None
 	return (row.custom_chevereto_album or "").strip() or None
 
@@ -132,9 +197,20 @@ def _default_gateway():
 	return None
 
 
-def _http_url(value):
-	if isinstance(value, str) and (value.startswith("http://") or value.startswith("https://")):
+def _media_url(value):
+	"""Accept a public http(s) URL or a site-relative file path."""
+	if not isinstance(value, str):
+		return None
+	value = value.strip()
+	if value.startswith(("http://", "https://")) or (value.startswith("/") and not value.startswith("//")):
 		return value
+	return None
+
+
+def _http_url(value):
+	cleaned = _media_url(value)
+	if cleaned and (cleaned.startswith("http://") or cleaned.startswith("https://")):
+		return cleaned
 	return None
 
 

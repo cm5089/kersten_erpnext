@@ -133,6 +133,23 @@
 		box-shadow: none !important;
 	}
 
+	.product-page-content .product-hero-open {
+		display: block;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: transparent;
+		cursor: pointer;
+		text-align: inherit;
+	}
+
+	.product-page-content .product-hero-open .website-image {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
 	.product-page-content .product-hero-media .website-image,
 	.product-page-content .product-hero-media .product-gallery-main img {
 		border: 0 !important;
@@ -322,7 +339,7 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 20px;
 		align-items: start;
-		padding: 24px;
+		padding: 14px;
 		background: transparent;
 		border: 0;
 		border-radius: 0;
@@ -580,8 +597,15 @@
 	}
 
 	.product-gallery-lightbox {
-		position: relative;
+		position: fixed;
+		top: 50%;
+		left: 50%;
+		right: auto;
+		bottom: auto;
+		transform: translate(-50%, -50%);
 		width: min(960px, 92vw);
+		max-height: calc(100vh - 48px);
+		margin: 0;
 		padding: 0;
 		border: 0;
 		background: transparent;

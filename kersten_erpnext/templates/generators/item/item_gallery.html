@@ -11,14 +11,15 @@
 </dialog>
 <script>
 (function () {
-	var section = document.getElementById("Gallery");
-	if (!section || section.dataset.galleryBound) {
+	var section = document.querySelector("#Gallery.item-website-gallery");
+	var websiteItemNode = section || document.querySelector("[data-website-item]");
+	if (!websiteItemNode || websiteItemNode.dataset.galleryBound) {
 		return;
 	}
-	section.dataset.galleryBound = "1";
+	websiteItemNode.dataset.galleryBound = "1";
 
-	var status = section.querySelector(".product-gallery-status");
-	var grid = section.querySelector(".product-gallery-grid");
+	var status = section && section.querySelector(".product-gallery-status");
+	var grid = section && section.querySelector(".product-gallery-grid");
 	var dialog = document.getElementById("ProductGalleryLightbox");
 	var lightboxImage = dialog && dialog.querySelector("img");
 	var lightboxVideo = dialog && dialog.querySelector("video");
@@ -26,7 +27,31 @@
 	var nextButton = dialog && dialog.querySelector(".product-gallery-next");
 	var items = [];
 	var current = 0;
-	var started = false;
+	var loadPromise = null;
+	var pendingOpen = null;
+
+	function sameUrl(left, right) {
+		if (!left || !right) {
+			return false;
+		}
+		try {
+			return new URL(left, window.location.href).href === new URL(right, window.location.href).href;
+		} catch (error) {
+			return left === right;
+		}
+	}
+
+	function openImage(url) {
+		var index = -1;
+		items.forEach(function (item, itemIndex) {
+			if (index < 0 && (sameUrl(item.full, url) || sameUrl(item.thumb, url))) {
+				index = itemIndex;
+			}
+		});
+		if (index >= 0) {
+			showItem(index);
+		}
+	}
 
 	function showItem(index) {
 		if (!items.length || !dialog) {
@@ -35,8 +60,12 @@
 		current = (index + items.length) % items.length;
 		var item = items[current];
 		var showNav = items.length > 1;
-		previousButton.hidden = !showNav;
-		nextButton.hidden = !showNav;
+		if (previousButton) {
+			previousButton.hidden = !showNav;
+		}
+		if (nextButton) {
+			nextButton.hidden = !showNav;
+		}
 		if (item.isVideo) {
 			lightboxImage.hidden = true;
 			lightboxImage.removeAttribute("src");
@@ -60,16 +89,26 @@
 	}
 
 	function show(images) {
-		grid.replaceChildren();
 		items = [];
+		if (grid) {
+			grid.replaceChildren();
+		}
 		if (!images.length) {
-			status.hidden = false;
-			status.textContent = "No gallery images for this product.";
-			grid.hidden = true;
+			if (status) {
+				status.hidden = false;
+				status.textContent = "No gallery images for this product.";
+			}
+			if (grid) {
+				grid.hidden = true;
+			}
 			return;
 		}
-		status.hidden = true;
-		grid.hidden = false;
+		if (status) {
+			status.hidden = true;
+		}
+		if (grid) {
+			grid.hidden = false;
+		}
 		images.forEach(function (image) {
 			var thumb = image.thumbnail || image.direct;
 			var full = image.direct || image.thumbnail;
@@ -78,7 +117,10 @@
 				return;
 			}
 			var index = items.length;
-			items.push({ full: full, isVideo: isVideo });
+			items.push({ full: full, thumb: thumb, isVideo: isVideo });
+			if (!grid) {
+				return;
+			}
 			var link = document.createElement("a");
 			link.href = full;
 			link.className = "product-gallery-item" + (isVideo ? " product-gallery-item-video" : "");
@@ -105,13 +147,14 @@
 	}
 
 	function load() {
-		if (started) {
-			return;
+		if (loadPromise) {
+			return loadPromise;
 		}
-		started = true;
-		status.textContent = "Loading gallery…";
-		var websiteItem = section.dataset.websiteItem || "";
-		fetch("/api/method/kersten_erpnext.product_gallery.get_album_images?website_item=" + encodeURIComponent(websiteItem), {
+		if (status) {
+			status.textContent = "Loading gallery…";
+		}
+		var websiteItem = websiteItemNode.dataset.websiteItem || "";
+		loadPromise = fetch("/api/method/kersten_erpnext.product_gallery.get_album_images?website_item=" + encodeURIComponent(websiteItem), {
 			credentials: "same-origin",
 			headers: { "Accept": "application/json" }
 		})
@@ -123,16 +166,40 @@
 			})
 			.then(function (payload) {
 				show((payload.message && payload.message.images) || []);
+				if (pendingOpen) {
+					var url = pendingOpen;
+					pendingOpen = null;
+					openImage(url);
+				}
 			})
 			.catch(function () {
-				status.hidden = false;
-				status.textContent = "Gallery images could not be loaded.";
+				loadPromise = null;
+				if (status) {
+					status.hidden = false;
+					status.textContent = "Gallery images could not be loaded.";
+				}
 			});
+		return loadPromise;
 	}
 
-	if (!("IntersectionObserver" in window)) {
+	document.querySelectorAll("[data-gallery-image]").forEach(function (button) {
+		button.addEventListener("click", function () {
+			var url = button.getAttribute("data-gallery-image");
+			if (!url) {
+				return;
+			}
+			if (items.length) {
+				openImage(url);
+				return;
+			}
+			pendingOpen = url;
+			load();
+		});
+	});
+
+	if (section && !("IntersectionObserver" in window)) {
 		load();
-	} else {
+	} else if (section) {
 		var observer = new IntersectionObserver(function (entries) {
 			if (entries.some(function (entry) { return entry.isIntersecting; })) {
 				observer.disconnect();
@@ -142,7 +209,7 @@
 		observer.observe(section);
 	}
 
-	if (dialog) {
+	if (dialog && previousButton && nextButton) {
 		previousButton.addEventListener("click", function () {
 			showItem(current - 1);
 		});
