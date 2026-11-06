@@ -285,8 +285,8 @@
 		width: 100%;
 		max-width: none;
 		margin: 36px 0 0;
-		background: var(--k-pale);
-		color: var(--k-ink);
+		background: var(--k-yellow);
+		color: #062e1c;
 	}
 
 	.product-page-content .product-description::before {
@@ -298,7 +298,7 @@
 		left: 50%;
 		width: 100vw;
 		transform: translateX(-50%);
-		background: var(--k-pale);
+		background: var(--k-yellow);
 	}
 
 	.product-page-content .product-description > * {
@@ -320,75 +320,86 @@
 	.fact-grid {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0;
-		align-items: stretch;
-		padding: 0;
+		gap: 20px;
+		align-items: start;
+		padding: 24px;
 		background: transparent;
 		border: 0;
 		border-radius: 0;
 		overflow: visible;
+		text-align: center;
 	}
 
 	@media (min-width: 761px) {
 		.fact-grid {
 			grid-template-columns: repeat(4, minmax(0, 1fr));
+			gap: 25px;
+		}
+
+		.fact-card:not(:nth-child(4n + 1)) {
+			border-left: 1px solid rgba(6, 46, 28, 0.19);
+			padding-left: 24px;
 		}
 	}
 
 	.fact-card {
 		background: transparent;
 		border: 0;
-		border: 1px solid var(--k-line);
 		border-radius: 0;
-		padding: 22px;
+		padding: 0;
 		box-shadow: none;
 		display: block;
 		height: auto;
 		min-width: 0;
 	}
 
-	@media (max-width: 560px) {
-		.fact-card {
-			padding: 18px 14px;
-		}
-	}
-
 	.fact-card a {
 		text-decoration: none;
 		color: inherit;
 		display: block;
+		text-align: center;
 	}
 
 	.fact-label {
-		display: inline-flex;
-		align-items: center;
-		width: fit-content;
-		max-width: 100%;
-		margin: 0 0 12px;
-		padding: 5px 11px;
-		border-radius: 999px;
-		background: var(--k-soft);
-		color: var(--k-green);
-		font-size: 0.72rem;
-		font-weight: 900;
-		letter-spacing: 0.08em;
-		line-height: 1.2;
-		text-transform: uppercase;
+		display: block;
+		width: auto;
+		max-width: none;
+		margin: 0;
+		padding: 0;
+		border-radius: 0;
+		background: transparent;
+		color: #062e1c;
+		font-family: Inter, Arial, Helvetica, sans-serif;
+		font-size: 1.0rem;
+		font-weight: 700;
+		letter-spacing: normal;
+		line-height: 1.6;
+		text-transform: none;
 	}
 
 	.fact-value {
 		font-family: Inter, Arial, Helvetica, sans-serif;
-		font-size: 16px;
-		line-height: 1.58;
-		letter-spacing: 0.02em;
-		color: var(--k-dark);
+		font-size: 0.86rem;
+		line-height: 1.7;
+		letter-spacing: normal;
+		color: #244631;
 		font-weight: 700;
-		margin: 0;
+		margin: 3px 0 0;
 		text-transform: none;
 		white-space: normal;
 		overflow: visible;
 		word-wrap: break-word;
-		padding-left: 10px;
+		padding-left: 0;
+	}
+
+	@media (max-width: 760px) {
+		.fact-label {
+			font-size: 0.94rem;
+		}
+
+		.fact-value {
+			font-size: 0.8rem;
+		}
 	}
 
 	.fact-card p {
