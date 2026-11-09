@@ -64,6 +64,9 @@
 				{{ web_block(template.template) }}
 			{% endfor %}
 
+			<!-- Gallery -->
+			{% include "templates/generators/item/item_gallery.html" %}
+
 			<!-- Related Items - Required Extras -->
 			{% set section_title = "RequiredExtras" %}
 			{% if section_title in related_items_by_groups.keys() %}

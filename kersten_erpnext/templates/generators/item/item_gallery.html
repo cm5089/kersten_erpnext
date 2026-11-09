@@ -1,0 +1,269 @@
+<div class="container item-website-gallery" id="Gallery" data-website-item="{{ doc.name | e }}">
+	<h2>Gallery</h2>
+	<p class="product-gallery-status">Gallery images load as you reach this section.</p>
+	<div class="product-gallery-grid" hidden></div>
+</div>
+<dialog class="product-gallery-lightbox" id="ProductGalleryLightbox">
+	<button type="button" class="product-gallery-nav product-gallery-prev" aria-label="Previous" hidden></button>
+	<img alt="">
+	<video controls playsinline hidden></video>
+	<iframe class="product-gallery-youtube" title="YouTube video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen hidden></iframe>
+	<button type="button" class="product-gallery-nav product-gallery-next" aria-label="Next" hidden></button>
+</dialog>
+<script>
+(function () {
+	var section = document.querySelector("#Gallery.item-website-gallery");
+	var websiteItemNode = section || document.querySelector("[data-website-item]");
+	if (!websiteItemNode || websiteItemNode.dataset.galleryBound) {
+		return;
+	}
+	websiteItemNode.dataset.galleryBound = "1";
+
+	var status = section && section.querySelector(".product-gallery-status");
+	var grid = section && section.querySelector(".product-gallery-grid");
+	var dialog = document.getElementById("ProductGalleryLightbox");
+	var lightboxImage = dialog && dialog.querySelector("img");
+	var lightboxVideo = dialog && dialog.querySelector("video");
+	var lightboxYoutube = dialog && dialog.querySelector("iframe");
+	var previousButton = dialog && dialog.querySelector(".product-gallery-prev");
+	var nextButton = dialog && dialog.querySelector(".product-gallery-next");
+	var items = [];
+	var current = 0;
+	var loadPromise = null;
+	var pendingOpen = null;
+
+	function sameUrl(left, right) {
+		if (!left || !right) {
+			return false;
+		}
+		try {
+			return new URL(left, window.location.href).href === new URL(right, window.location.href).href;
+		} catch (error) {
+			return left === right;
+		}
+	}
+
+	function openImage(url) {
+		var index = -1;
+		items.forEach(function (item, itemIndex) {
+			if (index < 0 && (sameUrl(item.full, url) || sameUrl(item.thumb, url))) {
+				index = itemIndex;
+			}
+		});
+		if (index >= 0) {
+			showItem(index);
+		}
+	}
+
+	function showItem(index) {
+		if (!items.length || !dialog) {
+			return;
+		}
+		current = (index + items.length) % items.length;
+		var item = items[current];
+		var showNav = items.length > 1;
+		if (previousButton) {
+			previousButton.hidden = !showNav;
+		}
+		if (nextButton) {
+			nextButton.hidden = !showNav;
+		}
+		if (item.isVideo) {
+			hideImage();
+			stopFileVideo();
+			stopYoutube();
+			lightboxVideo.hidden = false;
+			lightboxVideo.src = item.full;
+			showDialog();
+			lightboxVideo.play();
+			return;
+		}
+		if (item.isYoutube) {
+			hideImage();
+			stopFileVideo();
+			lightboxYoutube.hidden = false;
+			lightboxYoutube.src = item.full + "?autoplay=1";
+			showDialog();
+			return;
+		}
+		stopFileVideo();
+		stopYoutube();
+		lightboxImage.hidden = false;
+		lightboxImage.src = item.full;
+		showDialog();
+	}
+
+	function hideImage() {
+		lightboxImage.hidden = true;
+		lightboxImage.removeAttribute("src");
+	}
+
+	function stopFileVideo() {
+		lightboxVideo.pause();
+		lightboxVideo.removeAttribute("src");
+		lightboxVideo.load();
+		lightboxVideo.hidden = true;
+	}
+
+	function stopYoutube() {
+		lightboxYoutube.hidden = true;
+		lightboxYoutube.removeAttribute("src");
+	}
+
+	function showDialog() {
+		if (!dialog.open) {
+			dialog.showModal();
+		}
+	}
+
+	function show(images) {
+		items = [];
+		if (grid) {
+			grid.replaceChildren();
+		}
+		if (!images.length) {
+			if (status) {
+				status.hidden = false;
+				status.textContent = "No gallery images for this product.";
+			}
+			if (grid) {
+				grid.hidden = true;
+			}
+			return;
+		}
+		if (status) {
+			status.hidden = true;
+		}
+		if (grid) {
+			grid.hidden = false;
+		}
+		images.forEach(function (image) {
+			var thumb = image.thumbnail || image.direct;
+			var full = image.direct || image.thumbnail;
+			var isVideo = image.type === "video";
+			var isYoutube = image.type === "youtube";
+			if (!thumb) {
+				return;
+			}
+			var index = items.length;
+			items.push({ full: full, thumb: thumb, isVideo: isVideo, isYoutube: isYoutube });
+			if (!grid) {
+				return;
+			}
+			var link = document.createElement("a");
+			link.href = isYoutube ? "#" : full;
+			link.className = "product-gallery-item" + ((isVideo || isYoutube) ? " product-gallery-item-video" : "");
+			var img = document.createElement("img");
+			img.alt = (isVideo || isYoutube) ? "Product gallery video" : "Product gallery image";
+			img.loading = "lazy";
+			img.src = thumb;
+			link.appendChild(img);
+			if (isVideo || isYoutube) {
+				var play = document.createElement("span");
+				play.className = "product-gallery-play";
+				play.setAttribute("aria-hidden", "true");
+				link.appendChild(play);
+			}
+			link.addEventListener("click", function (event) {
+				if (!dialog || !dialog.showModal) {
+					return;
+				}
+				event.preventDefault();
+				showItem(index);
+			});
+			grid.appendChild(link);
+		});
+	}
+
+	function load() {
+		if (loadPromise) {
+			return loadPromise;
+		}
+		if (status) {
+			status.textContent = "Loading gallery…";
+		}
+		var websiteItem = websiteItemNode.dataset.websiteItem || "";
+		loadPromise = fetch("/api/method/kersten_erpnext.product_gallery.get_album_images?website_item=" + encodeURIComponent(websiteItem), {
+			credentials: "same-origin",
+			headers: { "Accept": "application/json" }
+		})
+			.then(function (response) {
+				if (!response.ok) {
+					throw new Error("Gallery request failed");
+				}
+				return response.json();
+			})
+			.then(function (payload) {
+				show((payload.message && payload.message.images) || []);
+				if (pendingOpen) {
+					var url = pendingOpen;
+					pendingOpen = null;
+					openImage(url);
+				}
+			})
+			.catch(function () {
+				loadPromise = null;
+				if (status) {
+					status.hidden = false;
+					status.textContent = "Gallery images could not be loaded.";
+				}
+			});
+		return loadPromise;
+	}
+
+	document.querySelectorAll("[data-gallery-image]").forEach(function (button) {
+		button.addEventListener("click", function () {
+			var url = button.getAttribute("data-gallery-image");
+			if (!url) {
+				return;
+			}
+			if (items.length) {
+				openImage(url);
+				return;
+			}
+			pendingOpen = url;
+			load();
+		});
+	});
+
+	if (section && !("IntersectionObserver" in window)) {
+		load();
+	} else if (section) {
+		var observer = new IntersectionObserver(function (entries) {
+			if (entries.some(function (entry) { return entry.isIntersecting; })) {
+				observer.disconnect();
+				load();
+			}
+		}, { rootMargin: "240px 0px" });
+		observer.observe(section);
+	}
+
+	if (dialog && previousButton && nextButton) {
+		previousButton.addEventListener("click", function () {
+			showItem(current - 1);
+		});
+		nextButton.addEventListener("click", function () {
+			showItem(current + 1);
+		});
+		dialog.addEventListener("keydown", function (event) {
+			if (event.key === "ArrowLeft") {
+				event.preventDefault();
+				showItem(current - 1);
+			}
+			if (event.key === "ArrowRight") {
+				event.preventDefault();
+				showItem(current + 1);
+			}
+		});
+		dialog.addEventListener("click", function (event) {
+			if (event.target === dialog) {
+				dialog.close();
+			}
+		});
+		dialog.addEventListener("close", function () {
+			stopFileVideo();
+			stopYoutube();
+		});
+	}
+})();
+</script>

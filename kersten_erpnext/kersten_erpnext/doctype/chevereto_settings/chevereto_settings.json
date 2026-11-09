@@ -1,0 +1,63 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-11-06 11:10:25.665106",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "chevereto_settings_section",
+  "column_break_qcml",
+  "chevereto_endpoint",
+  "chevereto_api_token"
+ ],
+ "fields": [
+  {
+   "fieldname": "chevereto_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Chevereto Settings"
+  },
+  {
+   "description": "Settings for a Custom API endpoint added to the Kersten Chevereto instance.  README and code can be found in apps \"/kersten/Chevereto_API_Extension\"",
+   "fieldname": "column_break_qcml",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Expected format: http://gallery.kerstenuk.com/api/1/album",
+   "fieldname": "chevereto_endpoint",
+   "fieldtype": "Data",
+   "label": "Chevereto Endpoint"
+  },
+  {
+   "description": "Get this from Chevereto settings",
+   "fieldname": "chevereto_api_token",
+   "fieldtype": "Password",
+   "label": "Chevereto API Token"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-06 11:52:34.607395",
+ "modified_by": "Administrator",
+ "module": "Kersten Erpnext",
+ "name": "Chevereto Settings",
+ "owner": "chrism@kerstenuk.com",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
