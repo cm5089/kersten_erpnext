@@ -7,6 +7,10 @@
         font-size: 20px;
         margin: 0;
     }
+	.product-title-link {
+		color: inherit;
+		text-decoration: none;
+	}
 	.section-cta-and-image{
 		position: relative;
 		border-radius: 1rem;
@@ -19,7 +23,13 @@
 
 <div class="col-md-7 product-details {{ width_class }}">
 	<div class="product-title" itemprop="name">
-		<h1 class="fontsize">{{ doc.web_item_name }}</h1>
+		<h1 class="fontsize">
+			{% if website_item_desk_route %}
+				<a class="product-title-link" href="{{ website_item_desk_route }}">{{ doc.web_item_name }}</a>
+			{% else %}
+				{{ doc.web_item_name }}
+			{% endif %}
+		</h1>
 	</div>
 
 	<!-- <div itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
