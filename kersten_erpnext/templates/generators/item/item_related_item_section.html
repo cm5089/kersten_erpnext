@@ -7,6 +7,9 @@
             <div class="item-group-header d-flex justify-content-between">
                 <div class="title-section">
                     <h2 class="section-title">{{ SECTION_TITLES[section_title] or "Related Items" }}</h2>
+                    {% if SECTION_INTROS and SECTION_INTROS.get(section_title) %}
+                        <p class="item-group-intro">{{ SECTION_INTROS[section_title] }}</p>
+                    {% endif %}
                 </div>
                 <div class="primary-action-section"></div>
             </div>
