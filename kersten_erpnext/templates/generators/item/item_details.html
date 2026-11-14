@@ -25,7 +25,7 @@
 	<div class="product-title" itemprop="name">
 		<h1 class="fontsize">
 			{% if website_item_desk_route %}
-				<a class="product-title-link" href="{{ website_item_desk_route }}">{{ doc.web_item_name }}</a>
+				<a class="product-title-link" href="{{ website_item_desk_route }}" target="_blank" rel="noopener">{{ doc.web_item_name }}</a>
 			{% else %}
 				{{ doc.web_item_name }}
 			{% endif %}
